@@ -7,8 +7,8 @@ export interface EnvironmentConfig {
 
 const environments: Record<TestEnvironment, EnvironmentConfig> = {
   hosted: {
-    webBaseUrl: '',
-    apiBaseUrl: '',
+    webBaseUrl: 'https://conduit-realworld-example-app.fly.dev',
+    apiBaseUrl: 'https://conduit-realworld-example-app.fly.dev/api',
   },
   local: {
     webBaseUrl: 'http://localhost:3000',
