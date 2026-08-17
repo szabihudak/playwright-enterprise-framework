@@ -1,4 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
+import { getCurrentEnvironment } from './src/utils/env';
+
+const environment = getCurrentEnvironment();
 
 /**
  * Read environment variables from file.
@@ -25,11 +28,10 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    baseURL: environment.webBaseUrl,
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
