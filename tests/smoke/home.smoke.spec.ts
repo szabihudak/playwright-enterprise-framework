@@ -1,17 +1,18 @@
-import { test, expect } from '@playwright/test';
-import { HomePage } from '../../src/pages/HomePage';
-import { NavigationBar } from '../../src/components/NavigationBar';
+import { test, expect } from '../../src/fixtures/test-fixtures';
 
 test.describe('Application smoke tests', () => {
-    test('home page loads with public navigation', async ({ page }) => {
-        const homePage = new HomePage(page);
-        const navigation = new NavigationBar(page);
-      
-        await homePage.goto();
-      
-        await expect(navigation.brand).toBeVisible();
-        await expect(navigation.homeLink).toBeVisible();
-        await expect(navigation.loginLink).toBeVisible();
-        await expect(navigation.signUpLink).toBeVisible();
-      });
+  test('home page loads with public navigation', async ({
+    homePage,
+    navigation,
+  }) => {
+    await homePage.goto();
+
+    await expect(homePage.heading).toBeVisible();
+    await expect(homePage.tagline).toBeVisible();
+
+    await expect(navigation.brand).toBeVisible();
+    await expect(navigation.homeLink).toBeVisible();
+    await expect(navigation.loginLink).toBeVisible();
+    await expect(navigation.signUpLink).toBeVisible();
+  });
 });
