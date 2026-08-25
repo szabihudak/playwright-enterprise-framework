@@ -1,4 +1,5 @@
 import { test as base, expect, type Page } from '@playwright/test';
+import { getCurrentEnvironment } from '../utils/env';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
 import { NavigationBar } from '../components/NavigationBar';
@@ -36,29 +37,47 @@ export const test = base.extend<AppFixtures>({
     const user = await userApi.register(createTestUser());
     await use(user);
   },
-  authenticatedPage: async ({ page, testUser }, use) => {
-    await page.addInitScript((user: AuthenticatedUser) => {
-      localStorage.setItem(
-        'loggedUser',
-        JSON.stringify({
-          headers: {
-            Authorization: `Token ${user.token}`,
+  authenticatedPage: async ({ browser, testUser }, use) => {
+    const { webBaseUrl } = getCurrentEnvironment();
+  
+    const loggedUser = {
+      headers: {
+        Authorization: `Token ${testUser.token}`,
+      },
+      isAuth: true,
+      loggedUser: {
+        bio: null,
+        email: testUser.email,
+        image: null,
+        token: testUser.token,
+        username: testUser.username,
+      },
+    };
+  
+    const context = await browser.newContext({
+      storageState: {
+        cookies: [],
+        origins: [
+          {
+            origin: webBaseUrl,
+            localStorage: [
+              {
+                name: 'loggedUser',
+                value: JSON.stringify(loggedUser),
+              },
+            ],
           },
-          isAuth: true,
-          loggedUser: {
-            bio: null,
-            email: user.email,
-            image: null,
-            token: user.token,
-            username: user.username,
-          },
-        }),
-      );
-    }, testUser);
+        ],
+      },
+    });
+  
+    const page = await context.newPage();
   
     await page.goto('/');
   
     await use(page);
+  
+    await context.close();
   },
 });
 
