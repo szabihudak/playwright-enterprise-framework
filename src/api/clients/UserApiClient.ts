@@ -21,20 +21,20 @@ import {
       private readonly request: APIRequestContext,
     ) {}
   
-    async register(user: TestUser): Promise<APIResponse> {
-      const { apiBaseUrl } = getCurrentEnvironment();
-  
-      return this.request.post(
-        `${apiBaseUrl}/auth/register`,
-        {
-          data: {
-            name: user.name,
-            email: user.email,
-            password: user.password,
+    async register(
+        user: Partial<TestUser>,
+      ): Promise<APIResponse> {
+        const { apiBaseUrl } = getCurrentEnvironment();
+      
+        return this.request.post(
+          `${apiBaseUrl}/auth/register`,
+          {
+            data: {
+              ...user,
+            },
           },
-        },
-      );
-    }
+        );
+      }
   
     async login(user: TestUser): Promise<APIResponse> {
       const { apiBaseUrl } = getCurrentEnvironment();

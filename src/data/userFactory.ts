@@ -1,11 +1,35 @@
-import type {TestUser} from "../api/models/User";
+import type { TestUser } from '../api/models/User';
 
-export function createTestUser(): TestUser {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+type CreateTestUserOptions = {
+  name?: string;
+  email?: string;
+  password?: string;
+};
 
-    return {
-        name: `qa_${id}`,
-        email: `qa_${id}@example.com`,
-        password: 'TestPassword123!',
-    }
+type CreateInvalidTestUserOptions = CreateTestUserOptions & {
+  missingFields?: (keyof TestUser)[];
+};
+
+export function createTestUser(
+  options: CreateTestUserOptions = {},
+): TestUser {
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  return {
+    name: options.name ?? `qa_${id}`,
+    email: options.email ?? `qa_${id}@example.com`,
+    password: options.password ?? 'TestPassword123!',
+  };
+}
+
+export function createInvalidTestUser(
+  options: CreateInvalidTestUserOptions = {},
+): Partial<TestUser> {
+  const user: Partial<TestUser> = createTestUser(options);
+
+  for (const field of options.missingFields ?? []) {
+    delete user[field];
+  }
+
+  return user;
 }
