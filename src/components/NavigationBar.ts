@@ -19,12 +19,12 @@ export class NavigationBar {
 
     this.navigation = page.getByTestId('main-navigation');
 
-    this.logoLink = page.getByTestId('app-logo-link');
+    this.logoLink = this.navigation.getByTestId('app-logo-link');
 
-    this.loginLink = page.getByTestId('nav-login-link');
-    this.registerLink = page.getByTestId('nav-register-link');
+    this.loginLink = this.navigation.getByTestId('nav-login-link');
+    this.registerLink = this.navigation.getByTestId('nav-register-link');
 
-    this.userMenuButton = page.getByTestId('user-menu-button');
+    this.userMenuButton = this.navigation.getByTestId('user-menu-button');
     this.userName = page.getByTestId('user-name');
     this.userEmail = page.getByTestId('user-email');
     this.dashboardLink = page.getByTestId('nav-dashboard-link');

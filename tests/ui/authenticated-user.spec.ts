@@ -1,22 +1,33 @@
 import { test, expect } from '../../src/fixtures/test-fixtures';
+import { NavigationBar } from '../../src/components/NavigationBar';
 
 test.describe('Authenticated user', () => {
-  test('authenticated user sees their username in navigation', async ({
+  test('authenticated user sees account navigation', async ({
     authenticatedPage,
     testUser,
   }) => {
-    const navigation = authenticatedPage.getByRole('navigation');
+    const navigation = new NavigationBar(authenticatedPage);
 
     await expect(
-      navigation.getByText(testUser.username, { exact: true }),
+      navigation.userMenuButton,
+    ).toBeVisible();
+
+    await navigation.openUserMenu();
+
+    await expect(
+      navigation.userName,
+    ).toHaveText(testUser.name);
+
+    await expect(
+      navigation.userEmail,
+    ).toHaveText(testUser.email);
+
+    await expect(
+      navigation.dashboardLink,
     ).toBeVisible();
 
     await expect(
-      navigation.getByRole('link', { name: 'Login' }),
+      navigation.loginLink,
     ).not.toBeVisible();
-
-    await expect(
-      navigation.getByRole('link', { name: 'New Article' }),
-    ).toBeVisible();
   });
 });
