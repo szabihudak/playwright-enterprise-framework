@@ -8,18 +8,19 @@
     "test": "tests"
   },
   "scripts": {
-  "test": "playwright test",
-  "test:list": "playwright test --list",
-  "test:headed": "playwright test --headed",
-  "test:debug": "playwright test --debug",
-  "typecheck": "tsc --noEmit"
- },
+    "test": "playwright test",
+    "test:list": "playwright test --list",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "typecheck": "tsc --noEmit"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
+    "prettier": "^3.9.6",
     "typescript": "^7.0.2"
   }
 }
