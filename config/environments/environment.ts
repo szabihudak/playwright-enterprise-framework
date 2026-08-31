@@ -7,16 +7,16 @@ export interface EnvironmentConfig {
 
 const environments: Record<TestEnvironment, EnvironmentConfig> = {
   hosted: {
-    webBaseUrl: 'https://conduit-realworld-example-app.fly.dev',
-    apiBaseUrl: 'https://conduit-realworld-example-app.fly.dev/api',
+    webBaseUrl: 'https://dojo.upexgalaxy.com',
+    apiBaseUrl: 'https://dojo.upexgalaxy.com/api',
   },
   local: {
     webBaseUrl: 'http://localhost:3000',
-    apiBaseUrl: 'http://localhost:3001/api',
+    apiBaseUrl: 'http://localhost:3000/api',
   },
   ci: {
     webBaseUrl: 'http://localhost:3000',
-    apiBaseUrl: 'http://localhost:3001/api',
+    apiBaseUrl: 'http://localhost:3000/api',
   },
 };
 

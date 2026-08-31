@@ -1,9 +1,9 @@
-export type  TestUser = {
-    username: string;
+export type TestUser = {
+    name: string;
     email: string;
     password: string;
-}
-
-export type AuthenticatedUser = TestUser & {
-    token: string;
-};
+  };
+  
+  export type AuthenticatedUser = TestUser & {
+    accessToken: string;
+  };

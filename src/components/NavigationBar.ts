@@ -1,18 +1,37 @@
 import { type Locator, type Page } from '@playwright/test';
 
 export class NavigationBar {
+  readonly page: Page;
   readonly navigation: Locator;
-  readonly brand: Locator;
-  readonly homeLink: Locator;
+
+  readonly logoLink: Locator;
   readonly loginLink: Locator;
-  readonly signUpLink: Locator;
+  readonly registerLink: Locator;
+
+  readonly userMenuButton: Locator;
+  readonly userName: Locator;
+  readonly userEmail: Locator;
+  readonly dashboardLink: Locator;
+  readonly logoutButton: Locator;
 
   constructor(page: Page) {
-    this.navigation = page.getByRole('navigation');
+    this.page = page;
 
-    this.brand = this.navigation.getByRole('link', { name: 'conduit' });
-    this.homeLink = this.navigation.getByRole('link', { name: 'Home' });
-    this.loginLink = this.navigation.getByRole('link', { name: 'Login' });
-    this.signUpLink = this.navigation.getByRole('link', { name: 'Sign up' });
+    this.navigation = page.getByTestId('main-navigation');
+
+    this.logoLink = page.getByTestId('app-logo-link');
+
+    this.loginLink = page.getByTestId('nav-login-link');
+    this.registerLink = page.getByTestId('nav-register-link');
+
+    this.userMenuButton = page.getByTestId('user-menu-button');
+    this.userName = page.getByTestId('user-name');
+    this.userEmail = page.getByTestId('user-email');
+    this.dashboardLink = page.getByTestId('nav-dashboard-link');
+    this.logoutButton = page.getByTestId('nav-logout-button');
+  }
+
+  async openUserMenu(): Promise<void> {
+    await this.userMenuButton.click();
   }
 }
