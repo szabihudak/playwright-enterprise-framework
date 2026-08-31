@@ -24,6 +24,20 @@ test.describe('User Authentication API', () => {
     expect(body.user.createdAt).toBeTruthy();
   });
 
+  test('try to register a user with 6 char password', async ({ userApi }) => {
+    const userData = createTestUser({
+      password: '123456',
+    });
+    const response = await userApi.register(userData);
+    expect(response.status()).toBe(201);
+    const body = await response.json();
+    expect(body.message).toBe('User created successfully');
+    expect(body.user.id).toBeTruthy();
+    expect(body.user.email).toMatch(userData.email);
+    expect(body.user.name).toMatch(userData.name);
+    expect(body.user.createdAt).toBeTruthy();
+  });
+
   test('try to register a user wirthout email address', async ({ userApi }) => {
     const userData = createTestUser({
       name: 'qa_missing_email',
@@ -76,22 +90,6 @@ test.describe('User Authentication API', () => {
         password: ['Password must be at least 6 characters'],
       },
     });
-  });
-
-  test('try to register a user with 6 char password', async ({ userApi }) => {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const userName = `qa_${id}`;
-    const userData = createTestUser({
-      password: '123456',
-    });
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(201);
-    const body = await response.json();
-    expect(body.message).toBe('User created successfully');
-    expect(body.user.id).toBeTruthy();
-    expect(body.user.email).toMatch(userData.email);
-    expect(body.user.name).toMatch(userData.name);
-    expect(body.user.createdAt).toBeTruthy();
   });
 
   test('try to register a user with less than  6 char password', async ({ userApi }) => {
