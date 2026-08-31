@@ -33,12 +33,12 @@ test.describe('User Authentication API', () => {
     const body = await response.json();
     expect(body.message).toBe('User created successfully');
     expect(body.user.id).toBeTruthy();
-    expect(body.user.email).toMatch(userData.email);
-    expect(body.user.name).toMatch(userData.name);
+    expect(body.user.email).toBe(userData.email);
+    expect(body.user.name).toBe(userData.name);
     expect(body.user.createdAt).toBeTruthy();
   });
 
-  test('try to register a user wirthout email address', async ({ userApi }) => {
+  test('try to register a user without email address', async ({ userApi }) => {
     const userData = createTestUser({
       name: 'qa_missing_email',
       email: '',
@@ -92,7 +92,7 @@ test.describe('User Authentication API', () => {
     });
   });
 
-  test('try to register a user with less than  6 char password', async ({ userApi }) => {
+  test('try to register a user with less than 6 char password', async ({ userApi }) => {
     const userData = createTestUser({
       password: '12345',
     });
@@ -109,9 +109,6 @@ test.describe('User Authentication API', () => {
   });
 
   test('try to register a user with the same email', async ({ userApi }) => {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const userName = `qa_${id}`;
-    console.log(userName);
     const userData = createTestUser();
     await userApi.register(userData);
     const response = await userApi.register(userData);
@@ -120,8 +117,7 @@ test.describe('User Authentication API', () => {
     expect(body.error).toBe('User already exists');
   });
 
-  test('try to register a user with missing email filed', async ({ userApi }) => {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  test('try to register a user with missing email field', async ({ userApi }) => {
     const userData = createInvalidTestUser({
       missingFields: ['email'],
     });
@@ -139,7 +135,6 @@ test.describe('User Authentication API', () => {
   });
 
   test('try to register a user with missing name filed', async ({ userApi }) => {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const userData = createInvalidTestUser({
       missingFields: ['name'],
     });
@@ -157,7 +152,6 @@ test.describe('User Authentication API', () => {
   });
 
   test('try to register a user with missing password filed', async ({ userApi }) => {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const userData = createInvalidTestUser({
       missingFields: ['password'],
     });
