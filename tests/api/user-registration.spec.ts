@@ -6,11 +6,6 @@ import {
 } from '../../src/data/userFactory';
 
 test.describe('User Authentication API', () => {
-  test.skip('can register a new user', async ({ testUser }) => {
-    expect(testUser.name).toBeTruthy();
-    expect(testUser.email).toContain('@example.com');
-    expect(testUser.accessToken).toBeTruthy();
-  });
 
   test('registers a valid user', async ({ userApi }) => {
     const userData = createTestUser();
@@ -56,7 +51,7 @@ test.describe('User Authentication API', () => {
     });
   });
 
-  test('try to register a user wirthout name', async ({ userApi }) => {
+  test('try to register a user without name', async ({ userApi }) => {
     const userData = createTestUser({
       name: '',
       email: 'qa_ABC@gmail.com',
@@ -74,7 +69,7 @@ test.describe('User Authentication API', () => {
     });
   });
 
-  test('try to register a user wirthout password', async ({ userApi }) => {
+  test('try to register a user without password', async ({ userApi }) => {
     const userData = createTestUser({
       name: 'qa_missing_password',
       email: 'qa_ABC@gmail.com',
@@ -133,7 +128,7 @@ test.describe('User Authentication API', () => {
     });
   });
 
-  test('try to register a user with missing name filed', async ({ userApi }) => {
+  test('try to register a user with missing name field', async ({ userApi }) => {
     const userData = createInvalidTestUser({
       missingFields: ['name'],
     });
@@ -149,7 +144,7 @@ test.describe('User Authentication API', () => {
     });
   });
 
-  test('try to register a user with missing password filed', async ({ userApi }) => {
+  test('try to register a user with missing password field', async ({ userApi }) => {
     const userData = createInvalidTestUser({
       missingFields: ['password'],
     });
