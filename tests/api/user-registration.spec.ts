@@ -1,12 +1,76 @@
 import { test, expect } from '../../src/fixtures/test-fixtures';
-
+import type { TestUser } from '../../src/api/models/User';
 import {
   createTestUser,
   createInvalidTestUser,
 } from '../../src/data/userFactory';
 
+type MissingFieldScenario = {
+  name: string;
+  missingField: keyof TestUser;
+};
+
+const emptyFieldScenarios = [
+  {
+    name: 'rejects an empty email',
+    overrides: { email: '' },
+    field: 'email',
+    expectedMessage: 'Invalid email address',
+  },
+  {
+    name: 'rejects an empty name',
+    overrides: { name: '' },
+    field: 'name',
+    expectedMessage: 'Name must be at least 2 characters',
+  },
+  {
+    name: 'rejects an empty password',
+    overrides: { password: '' },
+    field: 'password',
+    expectedMessage: 'Password must be at least 6 characters',
+  },
+];
+
+const missingFieldScenarios: MissingFieldScenario[] = [
+  {
+    name: 'rejects a missing email',
+    missingField: 'email',
+  },
+  {
+    name: 'rejects a missing name',
+    missingField: 'name',
+  },
+  {
+    name: 'rejects a missing password',
+    missingField: 'password',
+  },
+];
+
+
 test.describe('User Authentication API', () => {
 
+  for (const scenario of emptyFieldScenarios) {
+    test(scenario.name, async ({ userApi }) => {
+      const userData = createTestUser(scenario.overrides);
+      const response = await userApi.register(userData);
+      expect(response.status()).toBe(400);
+      const body = await response.json();
+      expect(body.error).toBe('Validation failed');
+      expect(body.details.fieldErrors[scenario.field],).toEqual([scenario.expectedMessage]);
+    });
+  }
+  
+  for (const scenario of missingFieldScenarios) {
+    test(scenario.name, async ({ userApi }) => {
+      const userData = createInvalidTestUser({missingFields: [scenario.missingField]});
+      const response = await userApi.register(userData);
+      expect(response.status()).toBe(400);
+      const body = await response.json();
+      expect(body.error).toBe('Validation failed');
+      expect(body.details.fieldErrors[scenario.missingField],).toEqual(['Required']);
+    });
+  }
+  
   test('registers a valid user', async ({ userApi }) => {
     const userData = createTestUser();
     const response = await userApi.register(userData);
@@ -19,10 +83,8 @@ test.describe('User Authentication API', () => {
     expect(body.user.createdAt).toBeTruthy();
   });
 
-  test('try to register a user with 6 char password', async ({ userApi }) => {
-    const userData = createTestUser({
-      password: '123456',
-    });
+  test('accepts a 6-character password', async ({ userApi }) => {
+    const userData = createTestUser({password: '123456'});
     const response = await userApi.register(userData);
     expect(response.status()).toBe(201);
     const body = await response.json();
@@ -33,48 +95,8 @@ test.describe('User Authentication API', () => {
     expect(body.user.createdAt).toBeTruthy();
   });
 
-  test('try to register a user without email address', async ({ userApi }) => {
-    const userData = createTestUser({
-      name: 'qa_missing_email',
-      email: '',
-      password: 'test1234!',
-    });
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Validation failed");
-    expect(body.details).toEqual({
-      formErrors: [],
-      fieldErrors: {
-        email: ['Invalid email address'],
-      },
-    });
-  });
-
-  test('try to register a user without name', async ({ userApi }) => {
-    const userData = createTestUser({
-      name: '',
-      email: 'qa_ABC@gmail.com',
-      password: 'test1234!',
-    });
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Validation failed");
-    expect(body.details).toEqual({
-      formErrors: [],
-      fieldErrors: {
-        name: ['Name must be at least 2 characters'],
-      },
-    });
-  });
-
-  test('try to register a user without password', async ({ userApi }) => {
-    const userData = createTestUser({
-      name: 'qa_missing_password',
-      email: 'qa_ABC@gmail.com',
-      password: '',
-    });
+  test('rejects a password shorter than 6 characters', async ({ userApi }) => {
+    const userData = createTestUser({password: '12345'});
     const response = await userApi.register(userData);
     expect(response.status()).toBe(400);
     const body = await response.json();
@@ -87,76 +109,12 @@ test.describe('User Authentication API', () => {
     });
   });
 
-  test('try to register a user with less than 6 char password', async ({ userApi }) => {
-    const userData = createTestUser({
-      password: '12345',
-    });
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Validation failed");
-    expect(body.details).toEqual({
-      formErrors: [],
-      fieldErrors: {
-        password: ['Password must be at least 6 characters'],
-      },
-    });
-  });
-
-  test('try to register a user with the same email', async ({ userApi }) => {
+  test('rejects duplicate registration - same email', async ({ userApi }) => {
     const userData = createTestUser();
     await userApi.register(userData);
     const response = await userApi.register(userData);
     expect(response.status()).toBe(409);
     const body = await response.json();
     expect(body.error).toBe('User already exists');
-  });
-
-  test('try to register a user with missing email field', async ({ userApi }) => {
-    const userData = createInvalidTestUser({
-      missingFields: ['email'],
-    });
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Validation failed");
-    expect(body.details).toEqual({
-      formErrors: [],
-      fieldErrors: {
-        email: ['Required'],
-      },
-    });
-  });
-
-  test('try to register a user with missing name field', async ({ userApi }) => {
-    const userData = createInvalidTestUser({
-      missingFields: ['name'],
-    });
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Validation failed");
-    expect(body.details).toEqual({
-      formErrors: [],
-      fieldErrors: {
-        name: ['Required'],
-      },
-    });
-  });
-
-  test('try to register a user with missing password field', async ({ userApi }) => {
-    const userData = createInvalidTestUser({
-      missingFields: ['password'],
-    });
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Validation failed");
-    expect(body.details).toEqual({
-      formErrors: [],
-      fieldErrors: {
-        password: ['Required'],
-      },
-    });
   });
 });
