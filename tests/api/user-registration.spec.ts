@@ -121,7 +121,6 @@ test.describe('User Authentication API', () => {
     const userData = createInvalidTestUser({
       missingFields: ['email'],
     });
-    await userApi.register(userData);
     const response = await userApi.register(userData);
     expect(response.status()).toBe(400);
     const body = await response.json();
@@ -138,7 +137,6 @@ test.describe('User Authentication API', () => {
     const userData = createInvalidTestUser({
       missingFields: ['name'],
     });
-    await userApi.register(userData);
     const response = await userApi.register(userData);
     expect(response.status()).toBe(400);
     const body = await response.json();
@@ -155,7 +153,6 @@ test.describe('User Authentication API', () => {
     const userData = createInvalidTestUser({
       missingFields: ['password'],
     });
-    await userApi.register(userData);
     const response = await userApi.register(userData);
     expect(response.status()).toBe(400);
     const body = await response.json();
