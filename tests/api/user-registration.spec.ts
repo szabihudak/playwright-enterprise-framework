@@ -48,29 +48,7 @@ const missingFieldScenarios: MissingFieldScenario[] = [
 
 
 test.describe('User Authentication API', () => {
-
-  for (const scenario of emptyFieldScenarios) {
-    test(scenario.name, async ({ userApi }) => {
-      const userData = createTestUser(scenario.overrides);
-      const response = await userApi.register(userData);
-      expect(response.status()).toBe(400);
-      const body = await response.json();
-      expect(body.error).toBe('Validation failed');
-      expect(body.details.fieldErrors[scenario.field],).toEqual([scenario.expectedMessage]);
-    });
-  }
-  
-  for (const scenario of missingFieldScenarios) {
-    test(scenario.name, async ({ userApi }) => {
-      const userData = createInvalidTestUser({missingFields: [scenario.missingField]});
-      const response = await userApi.register(userData);
-      expect(response.status()).toBe(400);
-      const body = await response.json();
-      expect(body.error).toBe('Validation failed');
-      expect(body.details.fieldErrors[scenario.missingField],).toEqual(['Required']);
-    });
-  }
-  
+ 
   test('registers a valid user', async ({ userApi }) => {
     const userData = createTestUser();
     const response = await userApi.register(userData);
@@ -117,4 +95,26 @@ test.describe('User Authentication API', () => {
     const body = await response.json();
     expect(body.error).toBe('User already exists');
   });
+
+  for (const scenario of emptyFieldScenarios) {
+    test(scenario.name, async ({ userApi }) => {
+      const userData = createTestUser(scenario.overrides);
+      const response = await userApi.register(userData);
+      expect(response.status()).toBe(400);
+      const body = await response.json();
+      expect(body.error).toBe('Validation failed');
+      expect(body.details.fieldErrors[scenario.field],).toEqual([scenario.expectedMessage]);
+    });
+  }
+  
+  for (const scenario of missingFieldScenarios) {
+    test(scenario.name, async ({ userApi }) => {
+      const userData = createInvalidTestUser({missingFields: [scenario.missingField]});
+      const response = await userApi.register(userData);
+      expect(response.status()).toBe(400);
+      const body = await response.json();
+      expect(body.error).toBe('Validation failed');
+      expect(body.details.fieldErrors[scenario.missingField],).toEqual(['Required']);
+    });
+  }
 });
