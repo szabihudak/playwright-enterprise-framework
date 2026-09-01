@@ -1,5 +1,6 @@
 import { test, expect } from "../../src/fixtures/test-fixtures";
 import type { TestUser } from "../../src/api/models/User";
+import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import {
   createTestUser,
   createInvalidTestUser,
@@ -50,7 +51,7 @@ test.describe("User Registration API", () => {
   test("registers a valid user", async ({ userApi }) => {
     const userData = createTestUser();
     const response = await userApi.register(userData);
-    expect(response.status()).toBe(201);
+    expect(response.status()).toBe(HTTP_STATUS.CREATED);
     const body = await response.json();
     expect(body.message).toBe("User created successfully");
     expect(body.user.id).toBeTruthy();
@@ -62,7 +63,7 @@ test.describe("User Registration API", () => {
   test("accepts a 6-character password", async ({ userApi }) => {
     const userData = createTestUser({ password: "123456" });
     const response = await userApi.register(userData);
-    expect(response.status()).toBe(201);
+    expect(response.status()).toBe(HTTP_STATUS.CREATED);
     const body = await response.json();
     expect(body.message).toBe("User created successfully");
     expect(body.user.id).toBeTruthy();
@@ -74,7 +75,7 @@ test.describe("User Registration API", () => {
   test("rejects a password shorter than 6 characters", async ({ userApi }) => {
     const userData = createTestUser({ password: "12345" });
     const response = await userApi.register(userData);
-    expect(response.status()).toBe(400);
+    expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
     const body = await response.json();
     expect(body.error).toBe("Validation failed");
     expect(body.details).toEqual({
@@ -89,7 +90,7 @@ test.describe("User Registration API", () => {
     const userData = createTestUser();
     await userApi.register(userData);
     const response = await userApi.register(userData);
-    expect(response.status()).toBe(409);
+    expect(response.status()).toBe(HTTP_STATUS.CONFLICT);
     const body = await response.json();
     expect(body.error).toBe("User already exists");
   });
@@ -98,7 +99,7 @@ test.describe("User Registration API", () => {
     test(scenario.name, async ({ userApi }) => {
       const userData = createTestUser(scenario.overrides);
       const response = await userApi.register(userData);
-      expect(response.status()).toBe(400);
+      expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
       const body = await response.json();
       expect(body.error).toBe("Validation failed");
       expect(body.details.fieldErrors[scenario.field]).toEqual([
@@ -113,7 +114,7 @@ test.describe("User Registration API", () => {
         missingFields: [scenario.missingField],
       });
       const response = await userApi.register(userData);
-      expect(response.status()).toBe(400);
+      expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
       const body = await response.json();
       expect(body.error).toBe("Validation failed");
       expect(body.details.fieldErrors[scenario.missingField]).toEqual([

@@ -1,5 +1,6 @@
 import { test, expect } from "../../src/fixtures/test-fixtures";
 import type { LoginCredentials } from "../../src/api/models/LoginCredentials";
+import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 
 type LoginValidationScenario = {
   name: string;
@@ -11,37 +12,37 @@ type LoginValidationScenario = {
 const loginValidationScenarios = [
   {
     name: "rejects an empty email",
-    statusCode: 400,
+    statusCode: HTTP_STATUS.BAD_REQUEST,
     overrides: { email: "", password: "TestPassword1234!" },
     expectedMessage: "Invalid email or password format",
   },
   {
     name: "rejects an empty password",
-    statusCode: 400,
+    statusCode: HTTP_STATUS.BAD_REQUEST,
     overrides: { email: "test@example.com", password: "" },
     expectedMessage: "Invalid email or password format",
   },
   {
     name: "rejects a malformed email",
-    statusCode: 400,
+    statusCode: HTTP_STATUS.BAD_REQUEST,
     overrides: { email: "user.com", password: "TestPassword1234!" },
     expectedMessage: "Invalid email or password format",
   },
   {
     name: "reject an unknown user",
-    statusCode: 401,
+    statusCode: HTTP_STATUS.UNAUTHORIZED,
     overrides: { email: "somebody@gmail.com", password: "TestPassword1234!" },
     expectedMessage: "Invalid credentials",
   },
   {
     name: "rejects a missing email",
-    statusCode: 400,
+    statusCode: HTTP_STATUS.BAD_REQUEST,
     overrides: { password: "TestPassword1234!" },
     expectedMessage: "Invalid email or password format",
   },
   {
     name: "rejects a missing password",
-    statusCode: 400,
+    statusCode: HTTP_STATUS.BAD_REQUEST,
     overrides: { email: "test@example.com" },
     expectedMessage: "Invalid email or password format",
   },
@@ -57,7 +58,7 @@ test.describe("User Authentication API", () => {
       password: registeredTestUser.password,
     });
     const body = await response.json();
-    expect(response.status()).toBe(200);
+    expect(response.status()).toBe(HTTP_STATUS.OK);
     expect(body.access_token).toBeTruthy();
     expect(body.token_type).toBe("Bearer");
     expect(body.expires_in).toBe(86400);
@@ -72,7 +73,7 @@ test.describe("User Authentication API", () => {
       password: "wrong_pwd_123",
     });
     const body = await response.json();
-    expect(response.status()).toBe(401);
+    expect(response.status()).toBe(HTTP_STATUS.UNAUTHORIZED);
     expect(body.error).toBe("Invalid credentials");
   });
 
