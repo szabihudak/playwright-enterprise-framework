@@ -52,6 +52,20 @@ import {
         );
       }
 
+      async getCurrentUser(
+        accessToken?: string,
+      ): Promise<APIResponse> {
+        const { apiBaseUrl } = getCurrentEnvironment();
+      
+        return this.request.get(`${apiBaseUrl}/auth/me`, {
+          headers: accessToken
+            ? {
+                Authorization: `Bearer ${accessToken}`,
+              }
+            : {},
+        });
+      }
+
     async registerUser(
         user: TestUser,
       ): Promise<TestUser> {

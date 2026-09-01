@@ -5,6 +5,7 @@ export const API_ERRORS = {
     NAME_LENGTH_VALIDATION_ERROR: "Name must be at least 2 characters",
     PASSWORD_LENGTH_VALIDATION_ERROR: "Password must be at least 6 characters",
     USER_ALREADY_EXISTS: "User already exists",
+    UNAUTHORIZED: "Unauthorized",
     VALIDATION_FAILED: "Validation failed",
     REQUIRED_FIELD: "Required",
   } as const;
