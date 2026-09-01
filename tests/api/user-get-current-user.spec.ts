@@ -25,7 +25,7 @@ const getCurrentUserValidationScenarios = [
 ] satisfies GetCurrentUserValidationScenario[];
 
 test.describe("Get Current User API", () => {
-  test.only("get current user with token", async ({
+  test("get current user with token", async ({
     userApi,
     authenticatedTestUser,
   }) => {
