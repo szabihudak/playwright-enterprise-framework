@@ -30,7 +30,7 @@ const loginValidationScenarios = [
     expectedMessage: API_ERRORS.INVALID_LOGIN_FORMAT,
   },
   {
-    name: "reject an unknown user",
+    name: "rejects an unknown user",
     statusCode: HTTP_STATUS.UNAUTHORIZED,
     overrides: { email: "somebody@gmail.com", password: "TestPassword1234!" },
     expectedMessage: API_ERRORS.INVALID_CREDENTIALS,
