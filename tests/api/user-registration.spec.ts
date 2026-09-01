@@ -1,10 +1,12 @@
 import { test, expect } from "../../src/fixtures/test-fixtures";
 import type { TestUser } from "../../src/api/models/User";
 import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
+import { API_ERRORS } from "../../src/api/constants/apiErrors";
 import {
   createTestUser,
   createInvalidTestUser,
 } from "../../src/data/userFactory";
+import { API_MESSAGES } from "../../src/api/constants/apiMessages";
 
 type MissingFieldScenario = {
   name: string;
@@ -16,19 +18,19 @@ const emptyFieldScenarios = [
     name: "rejects an empty email",
     overrides: { email: "" },
     field: "email",
-    expectedMessage: "Invalid email address",
+    expectedMessage: API_ERRORS.INVALID_EMAIL_ADDRESS,
   },
   {
     name: "rejects an empty name",
     overrides: { name: "" },
     field: "name",
-    expectedMessage: "Name must be at least 2 characters",
+    expectedMessage: API_ERRORS.NAME_LENGTH_VALIDATION_ERROR,
   },
   {
     name: "rejects an empty password",
     overrides: { password: "" },
     field: "password",
-    expectedMessage: "Password must be at least 6 characters",
+    expectedMessage: API_ERRORS.PASSWORD_LENGTH_VALIDATION_ERROR,
   },
 ];
 
@@ -53,7 +55,7 @@ test.describe("User Registration API", () => {
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
     const body = await response.json();
-    expect(body.message).toBe("User created successfully");
+    expect(body.message).toBe(API_MESSAGES.USER_CREATED);
     expect(body.user.id).toBeTruthy();
     expect(body.user.email).toBe(userData.email);
     expect(body.user.name).toBe(userData.name);
@@ -65,7 +67,7 @@ test.describe("User Registration API", () => {
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
     const body = await response.json();
-    expect(body.message).toBe("User created successfully");
+    expect(body.message).toBe(API_MESSAGES.USER_CREATED);
     expect(body.user.id).toBeTruthy();
     expect(body.user.email).toBe(userData.email);
     expect(body.user.name).toBe(userData.name);
@@ -77,11 +79,11 @@ test.describe("User Registration API", () => {
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
     const body = await response.json();
-    expect(body.error).toBe("Validation failed");
+    expect(body.error).toBe(API_ERRORS.VALIDATION_FAILED);
     expect(body.details).toEqual({
       formErrors: [],
       fieldErrors: {
-        password: ["Password must be at least 6 characters"],
+        password: [API_ERRORS.PASSWORD_LENGTH_VALIDATION_ERROR],
       },
     });
   });
@@ -92,7 +94,7 @@ test.describe("User Registration API", () => {
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.CONFLICT);
     const body = await response.json();
-    expect(body.error).toBe("User already exists");
+    expect(body.error).toBe(API_ERRORS.USER_ALREADY_EXISTS);
   });
 
   for (const scenario of emptyFieldScenarios) {
@@ -101,7 +103,7 @@ test.describe("User Registration API", () => {
       const response = await userApi.register(userData);
       expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
       const body = await response.json();
-      expect(body.error).toBe("Validation failed");
+      expect(body.error).toBe(API_ERRORS.VALIDATION_FAILED);
       expect(body.details.fieldErrors[scenario.field]).toEqual([
         scenario.expectedMessage,
       ]);
@@ -116,7 +118,7 @@ test.describe("User Registration API", () => {
       const response = await userApi.register(userData);
       expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
       const body = await response.json();
-      expect(body.error).toBe("Validation failed");
+      expect(body.error).toBe(API_ERRORS.VALIDATION_FAILED);
       expect(body.details.fieldErrors[scenario.missingField]).toEqual([
         "Required",
       ]);
