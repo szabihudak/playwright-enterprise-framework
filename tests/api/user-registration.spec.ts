@@ -120,7 +120,7 @@ test.describe("User Registration API", () => {
       const body = await response.json();
       expect(body.error).toBe(API_ERRORS.VALIDATION_FAILED);
       expect(body.details.fieldErrors[scenario.missingField]).toEqual([
-        "Required",
+        API_ERRORS.REQUIRED_FIELD,
       ]);
     });
   }
