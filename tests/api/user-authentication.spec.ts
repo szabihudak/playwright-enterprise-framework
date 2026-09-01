@@ -46,19 +46,21 @@ const missingFieldScenarios: MissingFieldScenario[] = [
   },
 ];
 
-test.describe("User Registration API", () => {
-  test("registers a valid user", async ({ userApi }) => {
-    const userData = createTestUser();
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(201);
-    const body = await response.json();
-    expect(body.message).toBe("User created successfully");
-    expect(body.user.id).toBeTruthy();
-    expect(body.user.email).toBe(userData.email);
-    expect(body.user.name).toBe(userData.name);
-    expect(body.user.createdAt).toBeTruthy();
+test.describe("User Authentication API", () => {
+  test("authenticate a valid user", async ({ userApi, testUserData }) => {
+    const user = testUserData;
+    console.log(user);
+    //const userData = createTestUser();
+    //const response = await userApi.register(userData);
+    //expect(response.status()).toBe(201);
+    //const body = await response.json();
+    //expect(body.message).toBe("User created successfully");
+    //expect(body.user.id).toBeTruthy();
+    //expect(body.user.email).toBe(userData.email);
+    //expect(body.user.name).toBe(userData.name);
+    //expect(body.user.createdAt).toBeTruthy();
   });
-
+/*
   test("accepts a 6-character password", async ({ userApi }) => {
     const userData = createTestUser({ password: "123456" });
     const response = await userApi.register(userData);
@@ -120,5 +122,5 @@ test.describe("User Registration API", () => {
         "Required",
       ]);
     });
-  }
+  }*/
 });

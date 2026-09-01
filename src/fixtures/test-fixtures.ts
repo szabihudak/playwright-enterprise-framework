@@ -23,12 +23,10 @@ type AppFixtures = {
   loginPage: LoginPage;
   registerPage:RegisterPage;
   navigation: NavigationBar;
-
   userApi: UserApiClient;
-
   testUserData: TestUser;
-  testUser: AuthenticatedUser;
-
+  registeredTestUser: TestUser;
+  authenticatedTestUser: AuthenticatedUser;
   authenticatedPage: Page;
 };
 
@@ -57,15 +55,24 @@ export const test = base.extend<AppFixtures>({
     await use(createTestUser());
   },
 
-  testUser: async ({ userApi }, use) => {
-    const user = await userApi.registerTestUser(
+  registeredTestUser: async ({ userApi }, use) => {
+    const user = await userApi.registerUser(
+      createTestUser(),
+    );
+
+    await use(user);
+  },
+  
+
+  authenticatedTestUser: async ({ userApi }, use) => {
+    const user = await userApi.registerAndAuthenticateTestUser(
       createTestUser(),
     );
 
     await use(user);
   },
 
-  authenticatedPage: async ({ browser, testUser }, use) => {
+  authenticatedPage: async ({ browser, authenticatedTestUsertestUser }, use) => {
     const { webBaseUrl } = getCurrentEnvironment();
   
     const context = await browser.newContext({
