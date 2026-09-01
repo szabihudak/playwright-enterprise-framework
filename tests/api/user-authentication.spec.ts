@@ -1,12 +1,14 @@
 import { test, expect } from "../../src/fixtures/test-fixtures";
 import { LoginCredentials } from "../../src/api/models/LoginCredentials";
 
-type Scenarios = {
+type LoginValidationScenario = {
   name: string;
-  missingField: keyof LoginCredentials;
+  statusCode: number;
+  overrides: Partial<LoginCredentials>;
+  expectedMessage: string;
 };
 
-const emptyFieldScenarios = [
+const loginValidationScenarios = [
   {
     name: "rejects an empty email",
     statusCode: 400,
@@ -43,7 +45,7 @@ const emptyFieldScenarios = [
     overrides: {email:"test@example.com"},
     expectedMessage: "Invalid email or password format",
   }, 
-];
+] satisfies LoginValidationScenario[];
 
 test.describe("User Authentication API", () => {
   test("authenticate a valid user", async ({ userApi, registeredTestUser }) => {
@@ -63,7 +65,7 @@ test.describe("User Authentication API", () => {
   });
 
 
-  for (const scenario of emptyFieldScenarios) {
+  for (const scenario of loginValidationScenarios) {
     test(scenario.name, async ({ userApi }) => {
       const response = await userApi.login(scenario.overrides);
       const body = await response.json();
