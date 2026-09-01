@@ -1,126 +1,82 @@
 import { test, expect } from "../../src/fixtures/test-fixtures";
-import type { TestUser } from "../../src/api/models/User";
-import {
-  createTestUser,
-  createInvalidTestUser,
-} from "../../src/data/userFactory";
+import { LoginCredentials } from "../../src/api/models/LoginCredentials";
 
 type MissingFieldScenario = {
   name: string;
-  missingField: keyof TestUser;
+  missingField: keyof LoginCredentials;
 };
+
+const user = {
+  name: 'qa_1788252573258-gd22q8',
+  email: 'qa_1788252573258-gd22q8@example.com',
+  password: 'TestPassword123!'
+}
 
 const emptyFieldScenarios = [
   {
     name: "rejects an empty email",
-    overrides: { email: "" },
-    field: "email",
-    expectedMessage: "Invalid email address",
-  },
-  {
-    name: "rejects an empty name",
-    overrides: { name: "" },
-    field: "name",
-    expectedMessage: "Name must be at least 2 characters",
+    statusCode: 400,
+    overrides: {email:"", password:user.password},
+    expectedMessage: "Invalid email or password format",
   },
   {
     name: "rejects an empty password",
-    overrides: { password: "" },
-    field: "password",
-    expectedMessage: "Password must be at least 6 characters",
-  },
-];
-
-const missingFieldScenarios: MissingFieldScenario[] = [
-  {
-    name: "rejects a missing email",
-    missingField: "email",
+    statusCode: 400,
+    overrides: {email:user.email, password:""},
+    expectedMessage: "Invalid email or password format",
   },
   {
-    name: "rejects a missing name",
-    missingField: "name",
+    name: "reject an known user with malformed email",
+    statusCode: 400,
+    overrides: {email:"user.com", password:user.password},
+    expectedMessage: "Invalid email or password format",
   },
   {
-    name: "rejects a missing password",
-    missingField: "password",
+    name: "reject a valid user with wrong password",
+    statusCode: 401,
+    overrides: {email:user.email, password:"asdf1234"},
+    expectedMessage: "Invalid credentials",
   },
+  {
+    name: "reject an unknown user with wrong password",
+    statusCode: 401,
+    overrides: {email:"somebody@gmail.com", password:"asdf1234"},
+    expectedMessage: "Invalid credentials",
+  },
+  {
+    name: "rejects an missing email",
+    statusCode: 400,
+    overrides: {password:user.password},
+    expectedMessage: "Invalid email or password format",
+  },
+  {
+    name: "rejects an missing password",
+    statusCode: 400,
+    overrides: {email:user.email},
+    expectedMessage: "Invalid email or password format",
+  }, 
 ];
 
 test.describe("User Authentication API", () => {
-  test("authenticate a valid user", async ({ userApi, testUserData }) => {
-    const user = testUserData;
-    console.log(user);
-    //const userData = createTestUser();
-    //const response = await userApi.register(userData);
-    //expect(response.status()).toBe(201);
-    //const body = await response.json();
-    //expect(body.message).toBe("User created successfully");
-    //expect(body.user.id).toBeTruthy();
-    //expect(body.user.email).toBe(userData.email);
-    //expect(body.user.name).toBe(userData.name);
-    //expect(body.user.createdAt).toBeTruthy();
-  });
-/*
-  test("accepts a 6-character password", async ({ userApi }) => {
-    const userData = createTestUser({ password: "123456" });
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(201);
+  test("authenticate a valid user", async ({ userApi, registeredTestUser }) => {
+    //const user = ;
+    //console.log(user);
+    const response = await userApi.login(user);
     const body = await response.json();
-    expect(body.message).toBe("User created successfully");
-    expect(body.user.id).toBeTruthy();
-    expect(body.user.email).toBe(userData.email);
-    expect(body.user.name).toBe(userData.name);
-    expect(body.user.createdAt).toBeTruthy();
+    console.log(body);
+    expect(response.status()).toBe(200);
+    expect(body.access_token).toBeTruthy();
+    expect(body.token_type).toBe("Bearer");
+    expect(body.expires_in).toBe(86400);
   });
 
-  test("rejects a password shorter than 6 characters", async ({ userApi }) => {
-    const userData = createTestUser({ password: "12345" });
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(400);
-    const body = await response.json();
-    expect(body.error).toBe("Validation failed");
-    expect(body.details).toEqual({
-      formErrors: [],
-      fieldErrors: {
-        password: ["Password must be at least 6 characters"],
-      },
-    });
-  });
-
-  test("rejects duplicate registration - same email", async ({ userApi }) => {
-    const userData = createTestUser();
-    await userApi.register(userData);
-    const response = await userApi.register(userData);
-    expect(response.status()).toBe(409);
-    const body = await response.json();
-    expect(body.error).toBe("User already exists");
-  });
 
   for (const scenario of emptyFieldScenarios) {
     test(scenario.name, async ({ userApi }) => {
-      const userData = createTestUser(scenario.overrides);
-      const response = await userApi.register(userData);
-      expect(response.status()).toBe(400);
+      const response = await userApi.login(scenario.overrides);
       const body = await response.json();
-      expect(body.error).toBe("Validation failed");
-      expect(body.details.fieldErrors[scenario.field]).toEqual([
-        scenario.expectedMessage,
-      ]);
+      expect(response.status()).toBe(scenario.statusCode);
+      expect(body.error).toBe(scenario.expectedMessage);
     });
   }
-
-  for (const scenario of missingFieldScenarios) {
-    test(scenario.name, async ({ userApi }) => {
-      const userData = createInvalidTestUser({
-        missingFields: [scenario.missingField],
-      });
-      const response = await userApi.register(userData);
-      expect(response.status()).toBe(400);
-      const body = await response.json();
-      expect(body.error).toBe("Validation failed");
-      expect(body.details.fieldErrors[scenario.missingField]).toEqual([
-        "Required",
-      ]);
-    });
-  }*/
 });

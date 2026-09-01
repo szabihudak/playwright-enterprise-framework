@@ -4,7 +4,7 @@ import { NavigationBar } from '../../src/components/NavigationBar';
 test.describe('Authenticated user', () => {
   test('authenticated user sees account navigation', async ({
     authenticatedPage,
-    testUser,
+    authenticatedTestUser,
   }) => {
     const navigation = new NavigationBar(authenticatedPage);
 
@@ -16,11 +16,11 @@ test.describe('Authenticated user', () => {
 
     await expect(
       navigation.userName,
-    ).toHaveText(testUser.name);
+    ).toHaveText(authenticatedTestUser.name);
 
     await expect(
       navigation.userEmail,
-    ).toHaveText(testUser.email);
+    ).toHaveText(authenticatedTestUser.email);
 
     await expect(
       navigation.dashboardLink,

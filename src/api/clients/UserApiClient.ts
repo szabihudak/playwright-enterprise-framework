@@ -4,6 +4,7 @@ import {
   } from '@playwright/test';
   
   import { getCurrentEnvironment } from '../../utils/env';
+  import type { LoginCredentials } from '../models/LoginCredentials';
   import type {
     AuthenticatedUser,
     TestUser,
@@ -36,19 +37,20 @@ import {
         );
       }
   
-    async login(user: TestUser): Promise<APIResponse> {
-      const { apiBaseUrl } = getCurrentEnvironment();
-  
-      return this.request.post(
-        `${apiBaseUrl}/auth/login`,
-        {
-          data: {
-            email: user.email,
-            password: user.password,
+      async login(
+        credentials: Partial<LoginCredentials>,
+      ): Promise<APIResponse> {
+        const { apiBaseUrl } = getCurrentEnvironment();
+      
+        return this.request.post(
+          `${apiBaseUrl}/auth/login`,
+          {
+            data: {
+              ...credentials,
+            },
           },
-        },
-      );
-    }
+        );
+      }
 
     async registerUser(
         user: TestUser,
@@ -71,7 +73,7 @@ import {
         };
       };
   
-    async registerAndAuthenticateTestUser(
+    async registerAndAuthenticateUser(
       user: TestUser,
     ): Promise<AuthenticatedUser> {
       logger.info(`Registering test user: ${user.email}`);

@@ -65,14 +65,14 @@ export const test = base.extend<AppFixtures>({
   
 
   authenticatedTestUser: async ({ userApi }, use) => {
-    const user = await userApi.registerAndAuthenticateTestUser(
+    const user = await userApi.registerAndAuthenticateUser(
       createTestUser(),
     );
 
     await use(user);
   },
 
-  authenticatedPage: async ({ browser, authenticatedTestUsertestUser }, use) => {
+  authenticatedPage: async ({ browser, authenticatedTestUser }, use) => {
     const { webBaseUrl } = getCurrentEnvironment();
   
     const context = await browser.newContext({
@@ -94,8 +94,8 @@ export const test = base.extend<AppFixtures>({
       {
         form: {
           csrfToken,
-          email: testUser.email,
-          password: testUser.password,
+          email: authenticatedTestUser.email,
+          password: authenticatedTestUser.password,
           callbackUrl: `${webBaseUrl}/dashboard`,
         },
       },
