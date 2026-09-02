@@ -1,11 +1,11 @@
 export const API_ERRORS = {
-    INVALID_LOGIN_FORMAT: "Invalid email or password format",
-    INVALID_CREDENTIALS: "Invalid credentials",
-    INVALID_EMAIL_ADDRESS: "Invalid email address",
-    NAME_LENGTH_VALIDATION_ERROR: "Name must be at least 2 characters",
-    PASSWORD_LENGTH_VALIDATION_ERROR: "Password must be at least 6 characters",
-    USER_ALREADY_EXISTS: "User already exists",
-    UNAUTHORIZED: "Unauthorized",
-    VALIDATION_FAILED: "Validation failed",
-    REQUIRED_FIELD: "Required",
-  } as const;
+  INVALID_LOGIN_FORMAT: "Invalid email or password format",
+  INVALID_CREDENTIALS: "Invalid credentials",
+  INVALID_EMAIL_ADDRESS: "Invalid email address",
+  NAME_LENGTH_VALIDATION_ERROR: "Name must be at least 2 characters",
+  PASSWORD_LENGTH_VALIDATION_ERROR: "Password must be at least 6 characters",
+  USER_ALREADY_EXISTS: "User already exists",
+  UNAUTHORIZED: "Unauthorized",
+  VALIDATION_FAILED: "Validation failed",
+  REQUIRED_FIELD: "Required",
+} as const;

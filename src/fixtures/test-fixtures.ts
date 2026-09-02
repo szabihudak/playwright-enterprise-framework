@@ -1,27 +1,20 @@
-import {
-  test as base,
-  expect,
-  type Page,
-} from '@playwright/test';
+import { test as base, expect, type Page } from "@playwright/test";
 
-import { getCurrentEnvironment } from '../utils/env';
-import { HomePage } from '../pages/HomePage';
-import { LoginPage } from '../pages/LoginPage';
-import { RegisterPage } from '../pages/RegisterPage';
-import { NavigationBar } from '../components/NavigationBar';
-import { UserApiClient } from '../api/clients/UserApiClient';
+import { getCurrentEnvironment } from "../utils/env";
+import { HomePage } from "../pages/HomePage";
+import { LoginPage } from "../pages/LoginPage";
+import { RegisterPage } from "../pages/RegisterPage";
+import { NavigationBar } from "../components/NavigationBar";
+import { UserApiClient } from "../api/clients/UserApiClient";
 
-import type {
-  AuthenticatedUser,
-  TestUser,
-} from '../api/models/User';
+import type { AuthenticatedUser, TestUser } from "../api/models/User";
 
-import { createTestUser } from '../data/userFactory';
+import { createTestUser } from "../data/userFactory";
 
 type AppFixtures = {
   homePage: HomePage;
   loginPage: LoginPage;
-  registerPage:RegisterPage;
+  registerPage: RegisterPage;
   navigation: NavigationBar;
   userApi: UserApiClient;
   testUserData: TestUser;
@@ -56,41 +49,36 @@ export const test = base.extend<AppFixtures>({
   },
 
   registeredTestUser: async ({ userApi }, use) => {
-    const user = await userApi.registerUser(
-      createTestUser(),
-    );
+    const user = await userApi.registerUser(createTestUser());
 
     await use(user);
   },
-  
 
   authenticatedTestUser: async ({ userApi }, use) => {
-    const user = await userApi.registerAndAuthenticateUser(
-      createTestUser(),
-    );
+    const user = await userApi.registerAndAuthenticateUser(createTestUser());
 
     await use(user);
   },
 
   authenticatedPage: async ({ browser, authenticatedTestUser }, use) => {
     const { webBaseUrl } = getCurrentEnvironment();
-  
+
     const context = await browser.newContext({
       baseURL: webBaseUrl,
     });
-  
-    const csrfResponse = await context.request.get('/api/auth/csrf');
-  
+
+    const csrfResponse = await context.request.get("/api/auth/csrf");
+
     if (!csrfResponse.ok()) {
       throw new Error(
         `Failed to obtain NextAuth CSRF token: ${csrfResponse.status()}`,
       );
     }
-  
+
     const { csrfToken } = await csrfResponse.json();
-  
+
     const loginResponse = await context.request.post(
-      '/api/auth/callback/credentials',
+      "/api/auth/callback/credentials",
       {
         form: {
           csrfToken,
@@ -100,21 +88,21 @@ export const test = base.extend<AppFixtures>({
         },
       },
     );
-  
+
     if (!loginResponse.ok()) {
       throw new Error(
         `Programmatic authentication failed: ${loginResponse.status()} ${await loginResponse.text()}`,
       );
     }
-  
+
     const page = await context.newPage();
-  
-    await page.goto('/dashboard');
-  
-    await page.waitForURL('**/dashboard');
-  
+
+    await page.goto("/dashboard");
+
+    await page.waitForURL("**/dashboard");
+
     await use(page);
-  
+
     await context.close();
   },
 });

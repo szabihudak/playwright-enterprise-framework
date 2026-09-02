@@ -1,9 +1,7 @@
-import { test, expect } from '../../src/fixtures/test-fixtures';
+import { test, expect } from "../../src/fixtures/test-fixtures";
 
-test.describe('Login smoke tests', () => {
-  test('login page is accessible', async ({
-    loginPage
-  }) => {
+test.describe("Login smoke tests", () => {
+  test("login page is accessible", async ({ loginPage }) => {
     await loginPage.goto();
 
     await expect(loginPage.heading).toBeVisible();

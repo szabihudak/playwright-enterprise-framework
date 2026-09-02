@@ -2,6 +2,8 @@ import { test, expect } from "../../src/fixtures/test-fixtures";
 import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
 import { CurrentUser } from "../../src/api/models/CurrentUser";
+import { currentUserSchema } from "../../src/api/schemas/CurrentUserSchema";
+import { validateSchema } from "../../src/api/utils/SchemaValidatior";
 
 type GetCurrentUserValidationScenario = {
   name: string;
@@ -31,20 +33,24 @@ test.describe("Get Current User API", () => {
   }) => {
     const user = authenticatedTestUser;
     const response = await userApi.getCurrentUser(user.accessToken);
-    const body = (await response.json()) as CurrentUser;
     expect(response.status()).toBe(HTTP_STATUS.OK);
-    expect(body.user.id).toBeTruthy();   
+    
+    const body = (await response.json()) as CurrentUser;
+    validateSchema(currentUserSchema,body);
+    
+    expect(body.user.id).toBeTruthy();
     expect(body.user.email).toBe(user.email);
     expect(body.user.name).toBe(user.name);
     expect(body.user.createdAt).toBeTruthy();
-    expect(body.user.updatedAt).toBeTruthy(); 
+    expect(body.user.updatedAt).toBeTruthy();
   });
 
   for (const scenario of getCurrentUserValidationScenarios) {
     test(scenario.name, async ({ userApi }) => {
       const response = await userApi.getCurrentUser(scenario.accessToken);
-      const body = await response.json();
       expect(response.status()).toBe(scenario.statusCode);
+
+      const body = await response.json();
       expect(body.error).toBe(scenario.expectedMessage);
     });
   }

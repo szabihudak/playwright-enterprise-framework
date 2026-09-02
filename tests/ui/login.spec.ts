@@ -1,7 +1,7 @@
-import { test, expect } from '../../src/fixtures/test-fixtures';
+import { test, expect } from "../../src/fixtures/test-fixtures";
 
-test.describe('Authentication', () => {
-  test('registered user can log in through the UI', async ({
+test.describe("Authentication", () => {
+  test("registered user can log in through the UI", async ({
     loginPage,
     authenticatedTestUser,
     navigation,
@@ -9,18 +9,14 @@ test.describe('Authentication', () => {
     await loginPage.goto();
 
     await loginPage.login(
-        authenticatedTestUser.email,
-        authenticatedTestUser.password,
+      authenticatedTestUser.email,
+      authenticatedTestUser.password,
     );
 
     await expect(loginPage.page).toHaveURL(/\/dashboard/);
 
-    await expect(
-      navigation.userMenuButton,
-    ).toBeVisible();
+    await expect(navigation.userMenuButton).toBeVisible();
 
-    await expect(
-      navigation.loginLink,
-    ).not.toBeVisible();
+    await expect(navigation.loginLink).not.toBeVisible();
   });
 });

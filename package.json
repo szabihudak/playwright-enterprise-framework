@@ -20,6 +20,8 @@
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "prettier": "^3.9.6",
     "typescript": "^7.0.2"
   }

@@ -1,5 +1,5 @@
-import { type Locator, type Page } from '@playwright/test';
-import type { TestUser } from '../api/models/User';
+import { type Locator, type Page } from "@playwright/test";
+import type { TestUser } from "../api/models/User";
 
 export class RegisterPage {
   readonly page: Page;
@@ -14,20 +14,20 @@ export class RegisterPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.heading = page.getByTestId('register-title');
-    this.nameInput = page.getByTestId('register-name-input');
-    this.emailInput = page.getByTestId('register-email-input');
-    this.passwordInput = page.getByTestId('register-password-input');
+    this.heading = page.getByTestId("register-title");
+    this.nameInput = page.getByTestId("register-name-input");
+    this.emailInput = page.getByTestId("register-email-input");
+    this.passwordInput = page.getByTestId("register-password-input");
     this.confirmPasswordInput = page.getByTestId(
-      'register-confirm-password-input',
+      "register-confirm-password-input",
     );
-    this.registerButton = page.getByTestId('register-submit-button');
-    this.errorMessage = page.getByTestId('register-error');
-    this.successMessage = page.getByTestId('register-success');
+    this.registerButton = page.getByTestId("register-submit-button");
+    this.errorMessage = page.getByTestId("register-error");
+    this.successMessage = page.getByTestId("register-success");
   }
 
   async goto(): Promise<void> {
-    await this.page.goto('/register');
+    await this.page.goto("/register");
   }
 
   async register(user: TestUser): Promise<void> {

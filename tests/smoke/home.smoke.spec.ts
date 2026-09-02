@@ -1,7 +1,7 @@
-import { test, expect } from '../../src/fixtures/test-fixtures';
+import { test, expect } from "../../src/fixtures/test-fixtures";
 
-test.describe('Application smoke tests', () => {
-  test('home page loads with public navigation', async ({
+test.describe("Application smoke tests", () => {
+  test("home page loads with public navigation", async ({
     homePage,
     navigation,
   }) => {

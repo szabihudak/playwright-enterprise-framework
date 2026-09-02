@@ -1,4 +1,4 @@
-import type { TestUser } from '../api/models/User';
+import type { TestUser } from "../api/models/User";
 
 type CreateTestUserOptions = {
   name?: string;
@@ -10,15 +10,13 @@ type CreateInvalidTestUserOptions = CreateTestUserOptions & {
   missingFields?: (keyof TestUser)[];
 };
 
-export function createTestUser(
-  options: CreateTestUserOptions = {},
-): TestUser {
+export function createTestUser(options: CreateTestUserOptions = {}): TestUser {
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   return {
     name: options.name ?? `qa_${id}`,
     email: options.email ?? `qa_${id}@example.com`,
-    password: options.password ?? 'TestPassword123!',
+    password: options.password ?? "TestPassword123!",
   };
 }
 
