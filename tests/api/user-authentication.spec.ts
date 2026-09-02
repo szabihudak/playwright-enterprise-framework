@@ -64,7 +64,7 @@ test.describe("User Authentication API", () => {
     expect(response.status()).toBe(HTTP_STATUS.OK);
 
     const body = (await response.json()) as Authentication;
-    validateSchema(authenticationSchema,body);
+    validateSchema(authenticationSchema, body);
 
     expect(body.access_token).toBeTruthy();
     expect(body.token_type).toBe("Bearer");
