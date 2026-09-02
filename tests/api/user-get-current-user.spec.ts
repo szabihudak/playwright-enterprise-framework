@@ -3,7 +3,7 @@ import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
 import { CurrentUser } from "../../src/api/models/CurrentUser";
 import { currentUserSchema } from "../../src/api/schemas/CurrentUserSchema";
-import { validateSchema } from "../../src/api/utils/SchemaValidatior";
+import { validateSchema } from "../../src/api/utils/SchemaValidator";
 
 type GetCurrentUserValidationScenario = {
   name: string;
@@ -34,10 +34,10 @@ test.describe("Get Current User API", () => {
     const user = authenticatedTestUser;
     const response = await userApi.getCurrentUser(user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.OK);
-    
+
     const body = (await response.json()) as CurrentUser;
-    validateSchema(currentUserSchema,body);
-    
+    validateSchema(currentUserSchema, body);
+
     expect(body.user.id).toBeTruthy();
     expect(body.user.email).toBe(user.email);
     expect(body.user.name).toBe(user.name);

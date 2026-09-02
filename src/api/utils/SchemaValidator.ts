@@ -17,11 +17,7 @@ export function validateSchema<T>(
 
   if (!isValid) {
     throw new Error(
-      `Schema validation failed:\n${JSON.stringify(
-        validate.errors,
-        null,
-        2,
-      )}`,
+      `Schema validation failed:\n${JSON.stringify(validate.errors, null, 2)}`,
     );
   }
 }
