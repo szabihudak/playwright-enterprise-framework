@@ -3,7 +3,7 @@ import type { LoginCredentials } from "../../src/api/models/LoginCredentials";
 import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
 import type { Authentication } from "../../src/api/models/Authentication";
-import { AuthenticationSchema } from "../../src/api/schemas/AuthenticationSchema";
+import { authenticationSchema } from "../../src/api/schemas/AuthenticationSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
 
 type LoginValidationScenario = {
@@ -63,8 +63,8 @@ test.describe("User Authentication API", () => {
     });
     expect(response.status()).toBe(HTTP_STATUS.OK);
 
-    const body = await response.json();
-    validateSchema(AuthenticationSchema,body);
+    const body = (await response.json()) as Authentication;
+    validateSchema(authenticationSchema,body);
 
     expect(body.access_token).toBeTruthy();
     expect(body.token_type).toBe("Bearer");

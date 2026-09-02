@@ -1,7 +1,7 @@
 import type { JSONSchemaType } from "ajv";
 import type { Authentication } from "../models/Authentication";
 
-export const AuthenticationSchema: JSONSchemaType<Authentication> = {
+export const authenticationSchema: JSONSchemaType<Authentication> = {
   type: "object",
   required: ["access_token", "token_type", "expires_in"],
 
