@@ -17,12 +17,12 @@ import { TasksDashboardPage } from "../pages/TasksDashboardPage";
 type AppFixtures = {
   authenticatedTestUser: AuthenticatedUser;
   authenticatedPage: Page;
-  createdTask:TaskResponse;
+  createdTask: TaskResponse;
   homePage: HomePage;
   loginPage: LoginPage;
   navigation: NavigationBar;
   userApi: UserApiClient;
-  tasksDashboardPage:TasksDashboardPage;
+  tasksDashboardPage: TasksDashboardPage;
   testUserData: TestUser;
   registerPage: RegisterPage;
   registeredTestUser: TestUser;
@@ -70,7 +70,10 @@ export const test = base.extend<AppFixtures>({
   },
 
   createdTask: async ({ userApi, authenticatedTestUser }, use) => {
-    const task = await userApi.createTaskForUser(createTask(),authenticatedTestUser.accessToken);
+    const task = await userApi.createTaskForUser(
+      createTask(),
+      authenticatedTestUser.accessToken,
+    );
 
     await use(task);
   },

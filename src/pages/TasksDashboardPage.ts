@@ -42,11 +42,4 @@ export class TasksDashboardPage {
       exact: true,
     });
   }
-
-  taskStatus(title: string, status: string): Locator {
-    return this.taskCardByTitle(title).getByText(status, {
-      exact: true,
-    });
-  }
-  
 }

@@ -1,18 +1,20 @@
-import type { TaskRequest } from "../api/models/Task";
+import type { TaskRequest, TaskPriority, TaskStatus } from "../api/models/Task";
 
 type CreateTaskRequestOptions = {
   title?: string;
   description?: string;
-  priority?: string;
-  status?: string;
+  priority?: TaskPriority;
+  status?: TaskStatus;
 };
 
 type CreateInvalidTaskRequestOptions = CreateTaskRequestOptions & {
   missingFields?: (keyof TaskRequest)[];
 };
 
-export function createTask(options: CreateTaskRequestOptions = {}): TaskRequest {
-  const id = `${Date.now()}-${Math.random().toString(36).slice(2,2)}`;
+export function createTask(
+  options: CreateTaskRequestOptions = {},
+): TaskRequest {
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   return {
     title: options.title ?? `taskTitle_${id}`,
