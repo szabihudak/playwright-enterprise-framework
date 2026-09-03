@@ -8,19 +8,24 @@ import { NavigationBar } from "../components/NavigationBar";
 import { UserApiClient } from "../api/clients/UserApiClient";
 
 import type { AuthenticatedUser, TestUser } from "../api/models/User";
+import type { TaskResponse } from "../api/models/Task";
 
 import { createTestUser } from "../data/userFactory";
+import { createTask } from "../data/taskFactory";
+import { TasksDashboardPage } from "../pages/TasksDashboardPage";
 
 type AppFixtures = {
-  homePage: HomePage;
-  loginPage: LoginPage;
-  registerPage: RegisterPage;
-  navigation: NavigationBar;
-  userApi: UserApiClient;
-  testUserData: TestUser;
-  registeredTestUser: TestUser;
   authenticatedTestUser: AuthenticatedUser;
   authenticatedPage: Page;
+  createdTask:TaskResponse;
+  homePage: HomePage;
+  loginPage: LoginPage;
+  navigation: NavigationBar;
+  userApi: UserApiClient;
+  tasksDashboardPage:TasksDashboardPage;
+  testUserData: TestUser;
+  registerPage: RegisterPage;
+  registeredTestUser: TestUser;
 };
 
 export const test = base.extend<AppFixtures>({
@@ -34,6 +39,10 @@ export const test = base.extend<AppFixtures>({
 
   registerPage: async ({ page }, use) => {
     await use(new RegisterPage(page));
+  },
+
+  tasksDashboardPage: async ({ authenticatedPage }, use) => {
+    await use(new TasksDashboardPage(authenticatedPage));
   },
 
   navigation: async ({ page }, use) => {
@@ -58,6 +67,12 @@ export const test = base.extend<AppFixtures>({
     const user = await userApi.registerAndAuthenticateUser(createTestUser());
 
     await use(user);
+  },
+
+  createdTask: async ({ userApi, authenticatedTestUser }, use) => {
+    const task = await userApi.createTaskForUser(createTask(),authenticatedTestUser.accessToken);
+
+    await use(task);
   },
 
   authenticatedPage: async ({ browser, authenticatedTestUser }, use) => {
