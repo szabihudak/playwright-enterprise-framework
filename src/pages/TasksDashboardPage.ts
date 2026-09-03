@@ -12,7 +12,7 @@ export class TasksDashboardPage {
       name: /tasks|dashboard/i,
     });
 
-    this.taskCards = page.locator('[data-testid="task-card"]');
+    this.taskCards = page.locator('[data-testid^="task-card-"]');
   }
 
   async goto(): Promise<void> {
