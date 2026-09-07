@@ -27,11 +27,11 @@ export function createTask(
 export function createInvalidTask(
   options: CreateInvalidTaskRequestOptions = {},
 ): Partial<TaskRequest> {
-  const user: Partial<TaskRequest> = createTask(options);
+  const task: Partial<TaskRequest> = createTask(options);
 
   for (const field of options.missingFields ?? []) {
-    delete user[field];
+    delete task[field];
   }
 
-  return user;
+  return task;
 }

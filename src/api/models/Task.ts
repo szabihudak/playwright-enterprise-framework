@@ -1,6 +1,10 @@
-export type TaskPriority = "low" | "medium" | "high";
+export const TASK_PRIORITIES = ["low", "medium", "high"] as const;
 
-export type TaskStatus = "backlog" | "in_progress" | "done";
+export const TASK_STATUSES = ["backlog", "in_progress", "done"] as const;
+
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
+
+export type TaskStatus = (typeof TASK_STATUSES)[number];
 
 export type TaskRequest = {
   title: string;
@@ -8,6 +12,7 @@ export type TaskRequest = {
   priority: TaskPriority;
   status: TaskStatus;
 };
+
 export type TaskResponse = {
   id: string;
   userId: string;

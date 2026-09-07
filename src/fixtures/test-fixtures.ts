@@ -6,6 +6,7 @@ import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { NavigationBar } from "../components/NavigationBar";
 import { UserApiClient } from "../api/clients/UserApiClient";
+import { TaskApiClient } from "../api/clients/TaskApiClient";
 
 import type { AuthenticatedUser, TestUser } from "../api/models/User";
 import type { TaskResponse } from "../api/models/Task";
@@ -22,6 +23,7 @@ type AppFixtures = {
   loginPage: LoginPage;
   navigation: NavigationBar;
   userApi: UserApiClient;
+  taskApi: TaskApiClient;
   tasksDashboardPage: TasksDashboardPage;
   testUserData: TestUser;
   registerPage: RegisterPage;
@@ -39,6 +41,10 @@ export const test = base.extend<AppFixtures>({
 
   registerPage: async ({ page }, use) => {
     await use(new RegisterPage(page));
+  },
+
+  taskApi: async ({ request }, use) => {
+    await use(new TaskApiClient(request));
   },
 
   tasksDashboardPage: async ({ authenticatedPage }, use) => {
@@ -69,8 +75,8 @@ export const test = base.extend<AppFixtures>({
     await use(user);
   },
 
-  createdTask: async ({ userApi, authenticatedTestUser }, use) => {
-    const task = await userApi.createTaskForUser(
+  createdTask: async ({ taskApi, authenticatedTestUser }, use) => {
+    const task = await taskApi.createTaskForUser(
       createTask(),
       authenticatedTestUser.accessToken,
     );

@@ -4,11 +4,12 @@ import type { TaskResponse } from "../../src/api/models/Task";
 import type { CurrentUser } from "../../src/api/models/CurrentUser";
 import { taskResponseSchema } from "../../src/api/schemas/TaskResponseSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
-import {createTask} from "../../src/data/taskFactory";
+import { createTask } from "../../src/data/taskFactory";
 
 test.describe("Create a Task API", () => {
   test("creates a task matching the provider contract", async ({
     userApi,
+    taskApi,
     authenticatedTestUser,
   }) => {
     const user = authenticatedTestUser;
@@ -18,10 +19,11 @@ test.describe("Create a Task API", () => {
     expect(currentUserResponse.status()).toBe(HTTP_STATUS.OK);
     const currentUser = (await currentUserResponse.json()) as CurrentUser;
     const taskData = createTask();
-    const response = await userApi.createTask(taskData, user.accessToken);
-    expect(response.status()).toBe(HTTP_STATUS.CREATED);
 
+    const response = await taskApi.createTask(taskData, user.accessToken);
+    expect(response.status()).toBe(HTTP_STATUS.CREATED);
     const body = (await response.json()) as TaskResponse;
+
     validateSchema(taskResponseSchema, body);
 
     expect(body.description).toBe(taskData.description);

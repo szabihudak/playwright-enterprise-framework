@@ -1,5 +1,9 @@
 import type { JSONSchemaType } from "ajv";
-import type { TaskResponse } from "../models/Task";
+import {
+  TASK_PRIORITIES,
+  TASK_STATUSES,
+  type TaskResponse,
+} from "../models/Task";
 
 export const taskResponseSchema: JSONSchemaType<TaskResponse> = {
   type: "object",
@@ -19,11 +23,11 @@ export const taskResponseSchema: JSONSchemaType<TaskResponse> = {
     },
     status: {
       type: "string",
-      enum: ["backlog", "in_progress", "done"],
+      enum: TASK_STATUSES,
     },
     priority: {
       type: "string",
-      enum: ["low", "medium", "high"],
+      enum: TASK_PRIORITIES,
     },
     position: {
       type: "number",
