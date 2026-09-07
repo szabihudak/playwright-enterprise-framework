@@ -1,7 +1,7 @@
 import { test, expect } from "../../src/fixtures/test-fixtures";
 import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
-import type { Task } from "../../src/api/models/Task";
+import type { TaskResponse } from "../../src/api/models/Task";
 import { taskResponseSchema } from "../../src/api/schemas/TaskResponseSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
 import {createTask} from "../../src/data/taskFactory";
@@ -37,7 +37,7 @@ test.describe("Create a Task API", () => {
     const response = await userApi.createTask(taskData, user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
 
-    const body = (await response.json()) as Task;
+    const body = (await response.json()) as TaskResponse;
     validateSchema(taskResponseSchema, body);
 
     expect(body.id).toBeTruthy();
