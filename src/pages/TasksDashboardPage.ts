@@ -1,4 +1,5 @@
 import { type Locator, type Page } from "@playwright/test";
+import type { TaskStatus } from "../api/models/Task";
 
 export class TasksDashboardPage {
   readonly page: Page;
@@ -41,5 +42,9 @@ export class TasksDashboardPage {
     return this.taskCardByTitle(title).getByText(priority, {
       exact: true,
     });
+  }
+
+  emptyColumn(status: TaskStatus): Locator {
+    return this.page.getByTestId(`column-empty-${status}`);
   }
 }
