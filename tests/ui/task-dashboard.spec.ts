@@ -23,7 +23,6 @@ test.describe("Task Dashboard tests", () => {
     authenticatedPage,
     tasksDashboardPage,
   }) => {
-    await authenticatedPage.route("**/api/tasks", async () => {
     await mockTasksServerError(authenticatedPage);
     await tasksDashboardPage.goto();
     await expect(tasksDashboardPage.emptyColumn("backlog")).toHaveText(
