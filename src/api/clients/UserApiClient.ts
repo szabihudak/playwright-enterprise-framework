@@ -3,13 +3,8 @@ import { type APIRequestContext, type APIResponse } from "@playwright/test";
 import { getCurrentEnvironment } from "../../utils/env";
 import type { LoginCredentials } from "../models/LoginCredentials";
 import type { AuthenticatedUser, TestUser } from "../models/User";
+import type { Authentication } from "../models/Authentication";
 import { logger } from "../../utils/logger";
-
-type LoginResponse = {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-};
 
 export class UserApiClient {
   constructor(private readonly request: APIRequestContext) {}
@@ -75,7 +70,7 @@ export class UserApiClient {
         `User login failed: ${loginResponse.status()} ${await loginResponse.text()}`,
       );
     }
-    const body = (await loginResponse.json()) as LoginResponse;
+    const body = (await loginResponse.json()) as Authentication;
     logger.info(`Test user logged in successfully: ${user.email}`);
     return {
       ...user,

@@ -4,11 +4,13 @@ import type { CurrentUser } from "../models/CurrentUser";
 export const currentUserSchema: JSONSchemaType<CurrentUser> = {
   type: "object",
   required: ["user"],
+  additionalProperties: false,
 
   properties: {
     user: {
       type: "object",
       required: ["id", "email", "name", "createdAt", "updatedAt"],
+      additionalProperties: false,
 
       properties: {
         id: {
