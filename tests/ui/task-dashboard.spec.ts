@@ -1,4 +1,5 @@
 import { test, expect } from "../../src/fixtures/test-fixtures";
+import { mockTasksServerError } from "../../src/mocks/taskApiMock";
 
 test.describe("Task Dashboard tests", () => {
   test("authenticated user sees the tasks on the dashboard", async ({
@@ -22,20 +23,8 @@ test.describe("Task Dashboard tests", () => {
     authenticatedPage,
     tasksDashboardPage,
   }) => {
-    await authenticatedPage.route("**/api/tasks", async (route) => {
-      if (route.request().method() !== "GET") {
-        await route.continue();
-        return;
-      }
-      await route.fulfill({
-        status: 500,
-        contentType: "application/json",
-        body: JSON.stringify({
-          error: "Internal Server Error",
-        }),
-      });
-    });
-
+    await authenticatedPage.route("**/api/tasks", async () => {
+    await mockTasksServerError(authenticatedPage);
     await tasksDashboardPage.goto();
     await expect(tasksDashboardPage.emptyColumn("backlog")).toHaveText(
       "No tasks",
