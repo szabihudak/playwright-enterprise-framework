@@ -18,10 +18,9 @@ test.describe("Task Dashboard tests", () => {
     ).toHaveText(task.priority);
   });
 
-  test.only("shows error state when tasks API fails", async ({
+  test("shows error state when tasks API fails", async ({
     authenticatedPage,
-    tasksDashboardPage
-
+    tasksDashboardPage,
   }) => {
     await authenticatedPage.route("**/api/tasks", async (route) => {
       if (route.request().method() !== "GET") {
@@ -32,14 +31,18 @@ test.describe("Task Dashboard tests", () => {
         status: 500,
         contentType: "application/json",
         body: JSON.stringify({
-          error:"Initial Server Error",
+          error: "Internal Server Error",
         }),
       });
     });
 
     await tasksDashboardPage.goto();
-    await expect(tasksDashboardPage.emptyColumn("backlog")).toHaveText("No tasks");
-    await expect(tasksDashboardPage.emptyColumn("in_progress")).toHaveText("No tasks");
+    await expect(tasksDashboardPage.emptyColumn("backlog")).toHaveText(
+      "No tasks",
+    );
+    await expect(tasksDashboardPage.emptyColumn("in_progress")).toHaveText(
+      "No tasks",
+    );
     await expect(tasksDashboardPage.emptyColumn("done")).toHaveText("No tasks");
   });
 });
