@@ -38,11 +38,8 @@ test.describe("Get Current User API", () => {
     const body = (await response.json()) as CurrentUser;
     validateSchema(currentUserSchema, body);
 
-    expect(body.user.id).toBeTruthy();
     expect(body.user.email).toBe(user.email);
     expect(body.user.name).toBe(user.name);
-    expect(body.user.createdAt).toBeTruthy();
-    expect(body.user.updatedAt).toBeTruthy();
   });
 
   for (const scenario of getCurrentUserValidationScenarios) {

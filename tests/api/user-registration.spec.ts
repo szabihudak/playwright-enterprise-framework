@@ -62,22 +62,21 @@ test.describe("User Registration API", () => {
     validateSchema(userRegistrationSchema, body);
 
     expect(body.message).toBe(API_MESSAGES.USER_CREATED);
-    expect(body.user.id).toBeTruthy();
     expect(body.user.email).toBe(userData.email);
     expect(body.user.name).toBe(userData.name);
-    expect(body.user.createdAt).toBeTruthy();
   });
 
   test("accepts a 6-character password", async ({ userApi }) => {
     const userData = createTestUser({ password: "123456" });
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
-    const body = await response.json();
+
+    const body = (await response.json()) as UserRegistration;
+    validateSchema(userRegistrationSchema, body);
+
     expect(body.message).toBe(API_MESSAGES.USER_CREATED);
-    expect(body.user.id).toBeTruthy();
     expect(body.user.email).toBe(userData.email);
     expect(body.user.name).toBe(userData.name);
-    expect(body.user.createdAt).toBeTruthy();
   });
 
   test("rejects a password shorter than 6 characters", async ({ userApi }) => {
