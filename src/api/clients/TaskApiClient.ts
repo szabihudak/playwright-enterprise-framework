@@ -7,7 +7,7 @@ export class TaskApiClient {
   constructor(private readonly request: APIRequestContext) {}
 
   async createTask(
-    task: TaskRequest,
+    task: Partial<TaskRequest>,
     accessToken: string,
   ): Promise<APIResponse> {
     const { apiBaseUrl } = getCurrentEnvironment();
