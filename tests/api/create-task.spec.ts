@@ -35,8 +35,8 @@ test.describe("Create a Task API", () => {
 
     const response = await taskApi.createTask(taskData, user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
-    const body = await response.json();
 
+    const body = await response.json();
     validateSchema(taskResponseSchema, body);
 
     expect(body.description).toBe(taskData.description);
@@ -59,8 +59,8 @@ test.describe("Create a Task API", () => {
 
     const response = await taskApi.createTask(taskData, user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
-    const body = await response.json();
 
+    const body = await response.json();
     validateSchema(taskResponseSchema, body);
 
     expect(body.description).toBeNull();
@@ -83,8 +83,8 @@ test.describe("Create a Task API", () => {
 
     const response = await taskApi.createTask(taskData, user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
-    const body = await response.json();
 
+    const body = await response.json();
     validateSchema(taskResponseSchema, body);
 
     expect(body.description).toBe(taskData.description);
@@ -107,8 +107,8 @@ test.describe("Create a Task API", () => {
 
     const response = await taskApi.createTask(taskData, user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
-    const body = await response.json();
 
+    const body = await response.json();
     validateSchema(taskResponseSchema, body);
 
     expect(body.description).toBe(taskData.description);
@@ -120,27 +120,33 @@ test.describe("Create a Task API", () => {
 
   test("rejects task without user token", async ({ taskApi }) => {
     const taskData = createTask();
+
     const response = await taskApi.createTask(taskData, "");
     expect(response.status()).toBe(HTTP_STATUS.UNAUTHORIZED);
+
     const body = await response.json();
+
     expect(body.error).toBe(API_ERRORS.UNAUTHORIZED);
   });
 
   test("rejects task with invalid user token", async ({ taskApi }) => {
     const taskData = createTask();
+
     const response = await taskApi.createTask(taskData, "Invalid-Token_123");
     expect(response.status()).toBe(HTTP_STATUS.UNAUTHORIZED);
+
     const body = await response.json();
+
     expect(body.error).toBe(API_ERRORS.UNAUTHORIZED);
   });
 
   for (const scenario of missingTaskFieldScenarios) {
     test(scenario.name, async ({ taskApi, authenticatedTestUser }) => {
       const user = authenticatedTestUser;
-
       const taskData = createTaskPayload({
         missingFields: [scenario.missingField],
       });
+      
       const response = await taskApi.createTask(taskData, user.accessToken);
       expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
 
