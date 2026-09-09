@@ -1,58 +1,37 @@
-import type { JSONSchemaType } from "ajv";
-import {
-  TASK_PRIORITIES,
-  TASK_STATUSES,
-  type TaskResponse,
-} from "../models/Task";
+import { Type, type Static } from "@sinclair/typebox";
+import { TASK_PRIORITIES, TASK_STATUSES } from "../models/Task";
 
-export const taskResponseSchema: JSONSchemaType<TaskResponse> = {
-  type: "object",
+export const taskResponseSchema = Type.Object(
+  {
+    id: Type.String(),
+    userId: Type.String(),
+    title: Type.String(),
 
-  properties: {
-    id: {
-      type: "string",
-    },
-    userId: {
-      type: "string",
-    },
-    title: {
-      type: "string",
-    },
-    description: {
-      type: "string",
-    },
-    status: {
-      type: "string",
-      enum: TASK_STATUSES,
-    },
-    priority: {
-      type: "string",
-      enum: TASK_PRIORITIES,
-    },
-    position: {
-      type: "number",
-    },
-    createdAt: {
-      type: "string",
+    description: Type.Union([
+      Type.String(),
+      Type.Null(),
+    ]),
+
+    status: Type.Union(
+      TASK_STATUSES.map((status) => Type.Literal(status)),
+    ),
+
+    priority: Type.Union(
+      TASK_PRIORITIES.map((priority) => Type.Literal(priority)),
+    ),
+
+    position: Type.Number(),
+
+    createdAt: Type.String({
       format: "date-time",
-    },
-    updatedAt: {
-      type: "string",
+    }),
+
+    updatedAt: Type.String({
       format: "date-time",
-    },
+    }),
   },
-
-  required: [
-    "id",
-    "userId",
-    "title",
-    "description",
-    "status",
-    "priority",
-    "position",
-    "createdAt",
-    "updatedAt",
-  ],
-
-  additionalProperties: false,
-};
+  {
+    additionalProperties: false,
+  },
+);
+export type TaskResponse = Static<typeof taskResponseSchema>;

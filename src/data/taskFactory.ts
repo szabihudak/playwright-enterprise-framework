@@ -1,4 +1,5 @@
-import type { TaskRequest, TaskPriority, TaskStatus } from "../api/models/Task";
+import type { TaskPriority, TaskStatus } from "../api/models/Task";
+import type { TaskRequest } from "../api/schemas/TaskRequestSchema";
 
 type CreateTaskRequestOptions = {
   title?: string;

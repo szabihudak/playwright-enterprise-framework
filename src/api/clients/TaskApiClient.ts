@@ -1,7 +1,8 @@
 import { type APIRequestContext, type APIResponse } from "@playwright/test";
 import { getCurrentEnvironment } from "../../utils/env";
 import { logger } from "../../utils/logger";
-import type { TaskRequest, TaskResponse } from "../models/Task";
+import type { TaskRequest } from "../schemas/TaskRequestSchema";
+import type { TaskResponse } from "../schemas/TaskResponseSchema";
 
 export class TaskApiClient {
   constructor(private readonly request: APIRequestContext) {}

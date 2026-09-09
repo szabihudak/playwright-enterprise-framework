@@ -9,7 +9,7 @@ import { UserApiClient } from "../api/clients/UserApiClient";
 import { TaskApiClient } from "../api/clients/TaskApiClient";
 
 import type { AuthenticatedUser, TestUser } from "../api/models/User";
-import type { TaskResponse } from "../api/models/Task";
+import type { TaskResponse } from "../api/schemas/TaskResponseSchema";
 
 import { createTestUser } from "../data/userFactory";
 import { createTask } from "../data/taskFactory";

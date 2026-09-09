@@ -7,7 +7,12 @@ test.describe("Task Dashboard tests", () => {
     createdTask,
   }) => {
     const task = createdTask;
-    await tasksDashboardPage.goto();
+
+if (task.description === null) {
+  throw new Error("Expected created task to have a description");
+}
+
+await tasksDashboardPage.goto();
     await expect(tasksDashboardPage.taskTitle(task.title)).toHaveText(
       task.title,
     );
