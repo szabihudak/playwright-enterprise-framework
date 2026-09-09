@@ -11,6 +11,13 @@ import {
 } from "../../src/data/userFactory";
 import { API_MESSAGES } from "../../src/api/constants/apiMessages";
 
+type EmptyFieldScenario = {
+  name: string;
+  overrides: Partial<TestUser>;
+  field: keyof TestUser;
+  expectedMessage: string;
+};
+
 type MissingFieldScenario = {
   name: string;
   missingField: keyof TestUser;
@@ -35,7 +42,7 @@ const emptyFieldScenarios = [
     field: "password",
     expectedMessage: API_ERRORS.PASSWORD_LENGTH_VALIDATION_ERROR,
   },
-];
+] satisfies EmptyFieldScenario[];
 
 const missingFieldScenarios: MissingFieldScenario[] = [
   {
@@ -50,7 +57,7 @@ const missingFieldScenarios: MissingFieldScenario[] = [
     name: "rejects a missing password",
     missingField: "password",
   },
-];
+] satisfies MissingFieldScenario[];
 
 test.describe("User Registration API", () => {
   test("registers a valid user", async ({ userApi }) => {
