@@ -61,6 +61,7 @@ const missingFieldScenarios: MissingFieldScenario[] = [
 test.describe("User Registration API", () => {
   test("registers a valid user", async ({ userApi }) => {
     const userData = createTestUser();
+
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
 
@@ -74,6 +75,7 @@ test.describe("User Registration API", () => {
 
   test("accepts a 6-character password", async ({ userApi }) => {
     const userData = createTestUser({ password: "123456" });
+
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
 
@@ -87,9 +89,12 @@ test.describe("User Registration API", () => {
 
   test("rejects a password shorter than 6 characters", async ({ userApi }) => {
     const userData = createTestUser({ password: "12345" });
+
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
+
     const body = await response.json();
+
     expect(body.error).toBe(API_ERRORS.VALIDATION_FAILED);
     expect(body.details).toEqual({
       formErrors: [],
@@ -102,18 +107,24 @@ test.describe("User Registration API", () => {
   test("rejects duplicate registration - same email", async ({ userApi }) => {
     const userData = createTestUser();
     await userApi.register(userData);
+
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.CONFLICT);
+
     const body = await response.json();
+
     expect(body.error).toBe(API_ERRORS.USER_ALREADY_EXISTS);
   });
 
   for (const scenario of emptyFieldScenarios) {
     test(scenario.name, async ({ userApi }) => {
       const userData = createTestUser(scenario.overrides);
+
       const response = await userApi.register(userData);
       expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
+
       const body = await response.json();
+
       expect(body.error).toBe(API_ERRORS.VALIDATION_FAILED);
       expect(body.details.fieldErrors[scenario.field]).toEqual([
         scenario.expectedMessage,
@@ -126,9 +137,12 @@ test.describe("User Registration API", () => {
       const userData = createInvalidTestUser({
         missingFields: [scenario.missingField],
       });
+
       const response = await userApi.register(userData);
       expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
+
       const body = await response.json();
+      
       expect(body.error).toBe(API_ERRORS.VALIDATION_FAILED);
       expect(body.details.fieldErrors[scenario.missingField]).toEqual([
         API_ERRORS.REQUIRED_FIELD,
