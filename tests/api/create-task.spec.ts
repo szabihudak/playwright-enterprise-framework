@@ -146,7 +146,7 @@ test.describe("Create a Task API", () => {
       const taskData = createTaskPayload({
         missingFields: [scenario.missingField],
       });
-      
+
       const response = await taskApi.createTask(taskData, user.accessToken);
       expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
 
