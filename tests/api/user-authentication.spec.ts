@@ -4,7 +4,6 @@ import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
 import {
   authenticationSchema,
-  type Authentication,
 } from "../../src/api/schemas/AuthenticationSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
 
@@ -65,7 +64,7 @@ test.describe("User Authentication API", () => {
     });
     expect(response.status()).toBe(HTTP_STATUS.OK);
 
-    const body = (await response.json()) as Authentication;
+    const body = await response.json()
     validateSchema(authenticationSchema, body);
 
     expect(body.access_token).toBeTruthy();
