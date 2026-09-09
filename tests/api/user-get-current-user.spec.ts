@@ -50,7 +50,7 @@ test.describe("Get Current User API", () => {
       expect(response.status()).toBe(scenario.statusCode);
 
       const body = await response.json();
-      
+
       expect(body.error).toBe(scenario.expectedMessage);
     });
   }
