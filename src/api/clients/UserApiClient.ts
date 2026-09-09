@@ -3,8 +3,9 @@ import { type APIRequestContext, type APIResponse } from "@playwright/test";
 import { getCurrentEnvironment } from "../../utils/env";
 import type { LoginCredentials } from "../schemas/LoginCredentialsSchema";
 import type { AuthenticatedUser, TestUser } from "../models/User";
-import type { Authentication } from "../schemas/AuthenticationSchema";
+import  { type Authentication, authenticationSchema } from "../schemas/AuthenticationSchema";
 import { logger } from "../../utils/logger";
+import { validateSchema } from "../utils/SchemaValidator";
 
 export class UserApiClient {
   constructor(private readonly request: APIRequestContext) {}
@@ -70,7 +71,9 @@ export class UserApiClient {
         `User login failed: ${loginResponse.status()} ${await loginResponse.text()}`,
       );
     }
-    const body = (await loginResponse.json()) as Authentication;
+    const body = await loginResponse.json();
+    validateSchema(authenticationSchema, body);
+
     logger.info(`Test user logged in successfully: ${user.email}`);
     return {
       ...user,

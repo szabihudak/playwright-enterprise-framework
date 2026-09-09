@@ -2,7 +2,8 @@ import { type APIRequestContext, type APIResponse } from "@playwright/test";
 import { getCurrentEnvironment } from "../../utils/env";
 import { logger } from "../../utils/logger";
 import type { TaskRequest } from "../schemas/TaskRequestSchema";
-import type { TaskResponse } from "../schemas/TaskResponseSchema";
+import { type TaskResponse, taskResponseSchema} from "../schemas/TaskResponseSchema";
+import { validateSchema } from "../utils/SchemaValidator";
 
 export class TaskApiClient {
   constructor(private readonly request: APIRequestContext) {}
@@ -39,13 +40,8 @@ export class TaskApiClient {
       );
     }
 
-    const createdTask = (await response.json()) as TaskResponse;
-
-    if (!createdTask.id) {
-      throw new Error(
-        "Task creation failed: response does not contain task id",
-      );
-    }
+    const createdTask = await response.json();
+    validateSchema(taskResponseSchema, createdTask);
 
     logger.info(`Task created successfully: ${task.title}`);
 
