@@ -1,7 +1,6 @@
 import { test, expect } from "../../src/fixtures/test-fixtures";
 import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
-import type { CurrentUser } from "../../src/api/schemas/CurrentUserSchema";
 import { currentUserSchema } from "../../src/api/schemas/CurrentUserSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
 
@@ -35,7 +34,7 @@ test.describe("Get Current User API", () => {
     const response = await userApi.getCurrentUser(user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.OK);
 
-    const body = (await response.json()) as CurrentUser;
+    const body = await response.json();
     validateSchema(currentUserSchema, body);
 
     expect(body.user.email).toBe(user.email);
