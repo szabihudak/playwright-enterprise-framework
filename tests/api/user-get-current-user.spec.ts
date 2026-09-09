@@ -31,6 +31,7 @@ test.describe("Get Current User API", () => {
     authenticatedTestUser,
   }) => {
     const user = authenticatedTestUser;
+
     const response = await userApi.getCurrentUser(user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.OK);
 
@@ -43,7 +44,9 @@ test.describe("Get Current User API", () => {
 
   for (const scenario of getCurrentUserValidationScenarios) {
     test(scenario.name, async ({ userApi }) => {
-      const response = await userApi.getCurrentUser(scenario.accessToken);
+      const accessToken = scenario.accessToken;
+
+      const response = await userApi.getCurrentUser(accessToken);
       expect(response.status()).toBe(scenario.statusCode);
 
       const body = await response.json();
