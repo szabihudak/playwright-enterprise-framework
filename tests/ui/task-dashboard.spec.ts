@@ -6,22 +6,27 @@ test.describe("Task Dashboard tests", () => {
     tasksDashboardPage,
     createdTask,
   }) => {
-    const task = createdTask;
+    const { request } = createdTask;
 
-if (task.description === null) {
-  throw new Error("Expected created task to have a description");
-}
+    await tasksDashboardPage.goto();
 
-await tasksDashboardPage.goto();
-    await expect(tasksDashboardPage.taskTitle(task.title)).toHaveText(
-      task.title,
-    );
     await expect(
-      tasksDashboardPage.taskDescription(task.title, task.description),
-    ).toHaveText(task.description);
+      tasksDashboardPage.taskTitle(request.title),
+    ).toHaveText(request.title);
+
     await expect(
-      tasksDashboardPage.taskPriority(task.title, task.priority),
-    ).toHaveText(task.priority);
+      tasksDashboardPage.taskDescription(
+        request.title,
+        request.description,
+      ),
+    ).toHaveText(request.description);
+
+    await expect(
+      tasksDashboardPage.taskPriority(
+        request.title,
+        request.priority,
+      ),
+    ).toHaveText(request.priority);
   });
 
   test("shows error state when tasks API fails", async ({
@@ -30,12 +35,17 @@ await tasksDashboardPage.goto();
   }) => {
     await mockTasksServerError(authenticatedPage);
     await tasksDashboardPage.goto();
-    await expect(tasksDashboardPage.emptyColumn("backlog")).toHaveText(
-      "No tasks",
-    );
-    await expect(tasksDashboardPage.emptyColumn("in_progress")).toHaveText(
-      "No tasks",
-    );
-    await expect(tasksDashboardPage.emptyColumn("done")).toHaveText("No tasks");
+
+    await expect(
+      tasksDashboardPage.emptyColumn("backlog"),
+    ).toHaveText("No tasks");
+
+    await expect(
+      tasksDashboardPage.emptyColumn("in_progress"),
+    ).toHaveText("No tasks");
+
+    await expect(
+      tasksDashboardPage.emptyColumn("done"),
+    ).toHaveText("No tasks");
   });
 });

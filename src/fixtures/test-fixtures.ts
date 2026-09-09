@@ -10,15 +10,21 @@ import { TaskApiClient } from "../api/clients/TaskApiClient";
 
 import type { AuthenticatedUser, TestUser } from "../api/models/User";
 import type { TaskResponse } from "../api/schemas/TaskResponseSchema";
+import type { CompleteTaskRequest } from "../data/taskFactory";
 
 import { createTestUser } from "../data/userFactory";
 import { createTask } from "../data/taskFactory";
 import { TasksDashboardPage } from "../pages/TasksDashboardPage";
 
+type CreatedTask = {
+  request: CompleteTaskRequest;
+  response: TaskResponse;
+};
+
 type AppFixtures = {
   authenticatedTestUser: AuthenticatedUser;
   authenticatedPage: Page;
-  createdTask: TaskResponse;
+  createdTask: CreatedTask;
   homePage: HomePage;
   loginPage: LoginPage;
   navigation: NavigationBar;
@@ -76,12 +82,17 @@ export const test = base.extend<AppFixtures>({
   },
 
   createdTask: async ({ taskApi, authenticatedTestUser }, use) => {
-    const task = await taskApi.createTaskForUser(
-      createTask(),
+    const request = createTask();
+
+    const response = await taskApi.createTaskForUser(
+      request,
       authenticatedTestUser.accessToken,
     );
 
-    await use(task);
+    await use({
+      request,
+      response,
+    });
   },
 
   authenticatedPage: async ({ browser, authenticatedTestUser }, use) => {

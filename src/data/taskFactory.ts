@@ -1,6 +1,8 @@
 import type { TaskPriority, TaskStatus } from "../api/models/Task";
 import type { TaskRequest } from "../api/schemas/TaskRequestSchema";
 
+export type CompleteTaskRequest = Required<TaskRequest>;
+
 type CreateTaskRequestOptions = {
   title?: string;
   description?: string;
@@ -14,7 +16,7 @@ type CreateInvalidTaskRequestOptions = CreateTaskRequestOptions & {
 
 export function createTask(
   options: CreateTaskRequestOptions = {},
-): TaskRequest {
+): CompleteTaskRequest {
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   return {

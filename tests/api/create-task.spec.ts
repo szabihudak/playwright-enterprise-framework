@@ -160,10 +160,10 @@ test.describe("Create a Task API", () => {
 
       const taskData = createInvalidTask({missingFields:[scenario.missingField]});
       const response = await taskApi.createTask(taskData, user.accessToken);
-     // expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
+      expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
   
       const body = await response.json();
-      console.log(body);
+
       expect(body.error).toBe(API_ERRORS.VALIDATION_FAILED);
       expect(body.details.fieldErrors[scenario.missingField]).toEqual([
         API_ERRORS.REQUIRED_FIELD,
