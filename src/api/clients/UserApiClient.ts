@@ -1,9 +1,9 @@
 import { type APIRequestContext, type APIResponse } from "@playwright/test";
 
 import { getCurrentEnvironment } from "../../utils/env";
-import type { LoginCredentials } from "../models/LoginCredentials";
+import type { LoginCredentials } from "../schemas/LoginCredentialsSchema";
 import type { AuthenticatedUser, TestUser } from "../models/User";
-import type { Authentication } from "../models/Authentication";
+import type { Authentication } from "../schemas/AuthenticationSchema";
 import { logger } from "../../utils/logger";
 
 export class UserApiClient {

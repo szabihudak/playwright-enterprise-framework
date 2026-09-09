@@ -2,8 +2,7 @@ import { test, expect } from "../../src/fixtures/test-fixtures";
 import type { TestUser } from "../../src/api/models/User";
 import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
-import type { UserRegistration } from "../../src/api/models/UserRegistration";
-import { userRegistrationSchema } from "../../src/api/schemas/UserRegistrationSchema";
+import { UserRegistration, userRegistrationSchema } from "../../src/api/schemas/UserRegistrationSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
 import {
   createTestUser,

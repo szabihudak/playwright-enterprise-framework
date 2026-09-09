@@ -1,40 +1,23 @@
-import type { JSONSchemaType } from "ajv";
-import type { UserRegistration } from "../models/UserRegistration";
+import { Type, type Static } from "@sinclair/typebox";
 
-export const userRegistrationSchema: JSONSchemaType<UserRegistration> = {
-  type: "object",
-  required: ["message", "user"],
-  additionalProperties: false,
-
-  properties: {
-    message: {
-      type: "string",
-    },
-
-    user: {
-      type: "object",
-      required: ["id", "email", "name", "createdAt"],
-      additionalProperties: false,
-
-      properties: {
-        id: {
-          type: "string",
-        },
-
-        email: {
-          type: "string",
-          format: "email",
-        },
-
-        name: {
-          type: "string",
-        },
-
-        createdAt: {
-          type: "string",
-          format: "date-time",
-        },
+export const userRegistrationSchema = Type.Object(
+  {
+    message: Type.String(),
+    user: Type.Object(
+      {
+        id: Type.String(),
+        email: Type.String({ format: "email" }),
+        name: Type.String(),
+        createdAt: Type.String({ format: "date-time" }),
       },
-    },
+      {
+        additionalProperties: false,
+      },
+    ),
   },
-};
+  {
+    additionalProperties: false,
+  },
+);
+
+export type UserRegistration = Static<typeof userRegistrationSchema>;

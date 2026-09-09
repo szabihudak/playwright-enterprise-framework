@@ -5,4 +5,3 @@ export const TASK_STATUSES = ["backlog", "in_progress", "done"] as const;
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
-

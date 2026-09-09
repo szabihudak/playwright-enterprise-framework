@@ -1,4 +1,4 @@
-import type { TaskPriority, TaskStatus } from "../api/models/Task";
+import type { TaskPriority, TaskStatus } from "../api/constants/task";
 import type { TaskRequest } from "../api/schemas/TaskRequestSchema";
 
 export type CompleteTaskRequest = Required<TaskRequest>;

@@ -1,23 +1,14 @@
-import type { JSONSchemaType } from "ajv";
+import { Type, type Static } from "@sinclair/typebox";
 
-import type { Authentication } from "../models/Authentication";
-
-export const authenticationSchema: JSONSchemaType<Authentication> = {
-  type: "object",
-
-  properties: {
-    access_token: {
-      type: "string",
-    },
-    token_type: {
-      type: "string",
-    },
-    expires_in: {
-      type: "number",
-    },
+export const authenticationSchema = Type.Object(
+  {
+    access_token: Type.String(),
+    token_type: Type.String(),
+    expires_in: Type.Number(),
   },
+  {
+    additionalProperties: false,
+  },
+);
 
-  required: ["access_token", "token_type", "expires_in"],
-
-  additionalProperties: false,
-};
+export type Authentication = Static<typeof authenticationSchema>;

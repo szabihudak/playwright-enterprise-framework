@@ -1,5 +1,5 @@
 import { type Locator, type Page } from "@playwright/test";
-import type { TaskStatus } from "../api/models/Task";
+import type { TaskStatus } from "../api/constants/task";
 
 export class TasksDashboardPage {
   readonly page: Page;

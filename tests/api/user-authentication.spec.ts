@@ -1,9 +1,11 @@
 import { test, expect } from "../../src/fixtures/test-fixtures";
-import type { LoginCredentials } from "../../src/api/models/LoginCredentials";
+import type { LoginCredentials } from "../../src/api/schemas/LoginCredentialsSchema";
 import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
-import type { Authentication } from "../../src/api/models/Authentication";
-import { authenticationSchema } from "../../src/api/schemas/AuthenticationSchema";
+import {
+  authenticationSchema,
+  type Authentication,
+} from "../../src/api/schemas/AuthenticationSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
 
 type LoginValidationScenario = {

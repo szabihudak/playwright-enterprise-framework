@@ -1,41 +1,23 @@
-import type { JSONSchemaType } from "ajv";
-import type { CurrentUser } from "../models/CurrentUser";
+import { Type, type Static } from "@sinclair/typebox";
 
-export const currentUserSchema: JSONSchemaType<CurrentUser> = {
-  type: "object",
-  required: ["user"],
-  additionalProperties: false,
-
-  properties: {
-    user: {
-      type: "object",
-      required: ["id", "email", "name", "createdAt", "updatedAt"],
-      additionalProperties: false,
-
-      properties: {
-        id: {
-          type: "string",
-        },
-
-        email: {
-          type: "string",
-          format: "email",
-        },
-
-        name: {
-          type: "string",
-        },
-
-        createdAt: {
-          type: "string",
-          format: "date-time",
-        },
-
-        updatedAt: {
-          type: "string",
-          format: "date-time",
-        },
+export const currentUserSchema = Type.Object(
+  {
+    user: Type.Object(
+      {
+        id: Type.String(),
+        email: Type.String({ format: "email" }),
+        name: Type.String(),
+        createdAt: Type.String({ format: "date-time" }),
+        updatedAt: Type.String({ format: "date-time" }),
       },
-    },
+      {
+        additionalProperties: false,
+      },
+    ),
   },
-};
+  {
+    additionalProperties: false,
+  },
+);
+
+export type CurrentUser = Static<typeof currentUserSchema>;
