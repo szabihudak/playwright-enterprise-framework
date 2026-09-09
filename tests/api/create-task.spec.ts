@@ -2,7 +2,10 @@ import { test, expect } from "../../src/fixtures/test-fixtures";
 import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
 import type { TaskRequest } from "../../src/api/schemas/TaskRequestSchema";
-import  { type CurrentUser, currentUserSchema } from "../../src/api/schemas/CurrentUserSchema";
+import {
+  type CurrentUser,
+  currentUserSchema,
+} from "../../src/api/schemas/CurrentUserSchema";
 import { taskResponseSchema } from "../../src/api/schemas/TaskResponseSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
 import { createTask, createTaskPayload } from "../../src/data/taskFactory";
