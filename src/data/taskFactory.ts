@@ -27,7 +27,7 @@ export function createTask(
   };
 }
 
-export function createInvalidTask(
+export function createTaskPayload(
   options: CreateInvalidTaskRequestOptions = {},
 ): Partial<TaskRequest> {
   const task: Partial<TaskRequest> = createTask(options);

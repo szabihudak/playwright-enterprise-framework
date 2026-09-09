@@ -6,7 +6,8 @@ import type { TaskResponse } from "../../src/api/schemas/TaskResponseSchema";
 import type { CurrentUser } from "../../src/api/models/CurrentUser";
 import { taskResponseSchema } from "../../src/api/schemas/TaskResponseSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
-import { createTask, createInvalidTask } from "../../src/data/taskFactory";
+import { createTask, createTaskPayload } from "../../src/data/taskFactory";
+import type { UserApiClient } from "../../src/api/clients/UserApiClient";
 
 type MissingTaskFieldScenario = {
   name: string;
@@ -27,11 +28,7 @@ test.describe("Create a Task API", () => {
     authenticatedTestUser,
   }) => {
     const user = authenticatedTestUser;
-    const currentUserResponse = await userApi.getCurrentUser(
-      authenticatedTestUser.accessToken,
-    );
-    expect(currentUserResponse.status()).toBe(HTTP_STATUS.OK);
-    const currentUser = (await currentUserResponse.json()) as CurrentUser;
+    const currentUser = await getCurrentUser(userApi,user.accessToken);
     const taskData = createTask();
 
     const response = await taskApi.createTask(taskData, user.accessToken);
@@ -52,14 +49,9 @@ test.describe("Create a Task API", () => {
     taskApi,
     authenticatedTestUser,
   }) => {
-
     const user = authenticatedTestUser;
-    const currentUserResponse = await userApi.getCurrentUser(
-      authenticatedTestUser.accessToken,
-    );
-    expect(currentUserResponse.status()).toBe(HTTP_STATUS.OK);
-    const currentUser = (await currentUserResponse.json()) as CurrentUser;
-    const taskData = createInvalidTask({
+    const currentUser = await getCurrentUser(userApi,user.accessToken);
+    const taskData = createTaskPayload({
       missingFields: ["description"],
     });
 
@@ -81,14 +73,9 @@ test.describe("Create a Task API", () => {
     taskApi,
     authenticatedTestUser,
   }) => {
-
     const user = authenticatedTestUser;
-    const currentUserResponse = await userApi.getCurrentUser(
-      authenticatedTestUser.accessToken,
-    );
-    expect(currentUserResponse.status()).toBe(HTTP_STATUS.OK);
-    const currentUser = (await currentUserResponse.json()) as CurrentUser;
-    const taskData = createInvalidTask({
+    const currentUser = await getCurrentUser(userApi,user.accessToken);
+    const taskData = createTaskPayload({
       missingFields: ["priority"],
     });
 
@@ -110,14 +97,9 @@ test.describe("Create a Task API", () => {
     taskApi,
     authenticatedTestUser,
   }) => {
-
     const user = authenticatedTestUser;
-    const currentUserResponse = await userApi.getCurrentUser(
-      authenticatedTestUser.accessToken,
-    );
-    expect(currentUserResponse.status()).toBe(HTTP_STATUS.OK);
-    const currentUser = (await currentUserResponse.json()) as CurrentUser;
-    const taskData = createInvalidTask({
+    const currentUser = await getCurrentUser(userApi,user.accessToken);
+    const taskData = createTaskPayload({
       missingFields: ["status"],
     });
 
@@ -158,7 +140,7 @@ test.describe("Create a Task API", () => {
     test(scenario.name, async ({ taskApi, authenticatedTestUser }) => {
       const user = authenticatedTestUser;
 
-      const taskData = createInvalidTask({missingFields:[scenario.missingField]});
+      const taskData = createTaskPayload({missingFields:[scenario.missingField]});
       const response = await taskApi.createTask(taskData, user.accessToken);
       expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
   
@@ -171,3 +153,12 @@ test.describe("Create a Task API", () => {
     });
   }
 });
+
+async function getCurrentUser(
+  userApi: UserApiClient,
+  accessToken: string,
+): Promise<CurrentUser> {
+  const response = await userApi.getCurrentUser(accessToken);
+  expect(response.status()).toBe(HTTP_STATUS.OK);
+  return (await response.json()) as CurrentUser;
+}
