@@ -44,7 +44,9 @@ export class UserApiClient {
 
   async registerUser(user: TestUser): Promise<TestUser> {
     logger.info(`Registering test user: ${user.email}`);
+  
     const registrationResponse = await this.register(user);
+  
     if (!registrationResponse.ok()) {
       logger.error(
         `User registration failed with status ${registrationResponse.status()}`,
@@ -53,7 +55,9 @@ export class UserApiClient {
         `User registration failed: ${registrationResponse.status()} ${await registrationResponse.text()}`,
       );
     }
+  
     logger.info(`Test user registered successfully: ${user.email}`);
+  
     return {
       ...user,
     };
@@ -63,18 +67,22 @@ export class UserApiClient {
     user: TestUser,
   ): Promise<AuthenticatedUser> {
     logger.info(`Registering test user: ${user.email}`);
+  
     user = await this.registerUser(user);
     const loginResponse = await this.login(user);
+  
     if (!loginResponse.ok()) {
       logger.error(`User login failed with status ${loginResponse.status()}`);
       throw new Error(
         `User login failed: ${loginResponse.status()} ${await loginResponse.text()}`,
       );
     }
+  
     const body = await loginResponse.json();
     validateSchema(authenticationSchema, body);
-
+  
     logger.info(`Test user logged in successfully: ${user.email}`);
+  
     return {
       ...user,
       accessToken: body.access_token,

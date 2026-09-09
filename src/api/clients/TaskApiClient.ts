@@ -36,12 +36,11 @@ export class TaskApiClient {
     const response = await this.createTask(task, accessToken);
 
     if (!response.ok()) {
-      logger.error(`Task creation failed with status ${response.status()}`);
-
-      throw new Error(
-        `Task creation failed: ${response.status()} ${await response.text()}`,
-      );
-    }
+        logger.error(`Task creation failed with status ${response.status()}`);
+        throw new Error(
+          `Task creation failed: ${response.status()} ${await response.text()}`,
+        );
+      }
 
     const createdTask = await response.json();
     validateSchema(taskResponseSchema, createdTask);
