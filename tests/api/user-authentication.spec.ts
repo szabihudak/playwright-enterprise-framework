@@ -56,10 +56,12 @@ test.describe("User Authentication API", () => {
     userApi,
     registeredTestUser,
   }) => {
-    const response = await userApi.login({
+    const credentials = {
       email: registeredTestUser.email,
       password: registeredTestUser.password,
-    });
+    };
+
+    const response = await userApi.login(credentials);
     expect(response.status()).toBe(HTTP_STATUS.OK);
 
     const body = await response.json();
@@ -74,20 +76,28 @@ test.describe("User Authentication API", () => {
     userApi,
     registeredTestUser,
   }) => {
-    const response = await userApi.login({
+    const credentials = {
       email: registeredTestUser.email,
       password: "wrong_pwd_123",
-    });
-    const body = await response.json();
+    };
+
+    const response = await userApi.login(credentials);
     expect(response.status()).toBe(HTTP_STATUS.UNAUTHORIZED);
+
+    const body = await response.json();
+
     expect(body.error).toBe(API_ERRORS.INVALID_CREDENTIALS);
   });
 
   for (const scenario of loginValidationScenarios) {
     test(scenario.name, async ({ userApi }) => {
-      const response = await userApi.login(scenario.overrides);
-      const body = await response.json();
+      const credentials = scenario.overrides;
+
+      const response = await userApi.login(credentials);
       expect(response.status()).toBe(scenario.statusCode);
+
+      const body = await response.json();
+
       expect(body.error).toBe(scenario.expectedMessage);
     });
   }
