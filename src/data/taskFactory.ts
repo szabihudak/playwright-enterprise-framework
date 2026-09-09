@@ -10,7 +10,7 @@ type CreateTaskRequestOptions = {
   status?: TaskStatus;
 };
 
-type CreateInvalidTaskRequestOptions = CreateTaskRequestOptions & {
+type CreateTaskPayloadOptions = CreateTaskRequestOptions & {
   missingFields?: (keyof TaskRequest)[];
 };
 
@@ -28,7 +28,7 @@ export function createTask(
 }
 
 export function createTaskPayload(
-  options: CreateInvalidTaskRequestOptions = {},
+  options: CreateTaskPayloadOptions = {},
 ): Partial<TaskRequest> {
   const task: Partial<TaskRequest> = createTask(options);
 

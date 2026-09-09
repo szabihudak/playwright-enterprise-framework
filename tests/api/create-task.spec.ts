@@ -28,12 +28,12 @@ test.describe("Create a Task API", () => {
     authenticatedTestUser,
   }) => {
     const user = authenticatedTestUser;
-    const currentUser = await getCurrentUser(userApi,user.accessToken);
+    const currentUser = await getCurrentUser(userApi, user.accessToken);
     const taskData = createTask();
 
     const response = await taskApi.createTask(taskData, user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
-    const body = (await response.json()) as TaskResponse;
+    const body = await response.json();
 
     validateSchema(taskResponseSchema, body);
 
@@ -50,14 +50,14 @@ test.describe("Create a Task API", () => {
     authenticatedTestUser,
   }) => {
     const user = authenticatedTestUser;
-    const currentUser = await getCurrentUser(userApi,user.accessToken);
+    const currentUser = await getCurrentUser(userApi, user.accessToken);
     const taskData = createTaskPayload({
       missingFields: ["description"],
     });
 
     const response = await taskApi.createTask(taskData, user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
-    const body = (await response.json()) as TaskResponse;
+    const body = await response.json();
 
     validateSchema(taskResponseSchema, body);
 
@@ -74,14 +74,14 @@ test.describe("Create a Task API", () => {
     authenticatedTestUser,
   }) => {
     const user = authenticatedTestUser;
-    const currentUser = await getCurrentUser(userApi,user.accessToken);
+    const currentUser = await getCurrentUser(userApi, user.accessToken);
     const taskData = createTaskPayload({
       missingFields: ["priority"],
     });
 
     const response = await taskApi.createTask(taskData, user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
-    const body = (await response.json()) as TaskResponse;
+    const body = await response.json();
 
     validateSchema(taskResponseSchema, body);
 
@@ -98,14 +98,14 @@ test.describe("Create a Task API", () => {
     authenticatedTestUser,
   }) => {
     const user = authenticatedTestUser;
-    const currentUser = await getCurrentUser(userApi,user.accessToken);
+    const currentUser = await getCurrentUser(userApi, user.accessToken);
     const taskData = createTaskPayload({
       missingFields: ["status"],
     });
 
     const response = await taskApi.createTask(taskData, user.accessToken);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
-    const body = (await response.json()) as TaskResponse;
+    const body = await response.json();
 
     validateSchema(taskResponseSchema, body);
 
@@ -116,9 +116,7 @@ test.describe("Create a Task API", () => {
     expect(body.userId).toBe(currentUser.user.id);
   });
 
-  test("rejects task without user token", async ({
-    taskApi,
-  }) => {
+  test("rejects task without user token", async ({ taskApi }) => {
     const taskData = createTask();
     const response = await taskApi.createTask(taskData, "");
     expect(response.status()).toBe(HTTP_STATUS.UNAUTHORIZED);
@@ -126,9 +124,7 @@ test.describe("Create a Task API", () => {
     expect(body.error).toBe(API_ERRORS.UNAUTHORIZED);
   });
 
-  test("rejects task with invalid user token", async ({
-    taskApi,
-  }) => {
+  test("rejects task with invalid user token", async ({ taskApi }) => {
     const taskData = createTask();
     const response = await taskApi.createTask(taskData, "Invalid-Token_123");
     expect(response.status()).toBe(HTTP_STATUS.UNAUTHORIZED);
@@ -140,10 +136,12 @@ test.describe("Create a Task API", () => {
     test(scenario.name, async ({ taskApi, authenticatedTestUser }) => {
       const user = authenticatedTestUser;
 
-      const taskData = createTaskPayload({missingFields:[scenario.missingField]});
+      const taskData = createTaskPayload({
+        missingFields: [scenario.missingField],
+      });
       const response = await taskApi.createTask(taskData, user.accessToken);
       expect(response.status()).toBe(HTTP_STATUS.BAD_REQUEST);
-  
+
       const body = await response.json();
 
       expect(body.error).toBe(API_ERRORS.VALIDATION_FAILED);
