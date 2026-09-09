@@ -2,7 +2,7 @@ import { test, expect } from "../../src/fixtures/test-fixtures";
 import type { TestUser } from "../../src/api/models/User";
 import { HTTP_STATUS } from "../../src/api/constants/httpStatuses";
 import { API_ERRORS } from "../../src/api/constants/apiErrors";
-import { UserRegistration, userRegistrationSchema } from "../../src/api/schemas/UserRegistrationSchema";
+import { userRegistrationSchema } from "../../src/api/schemas/UserRegistrationSchema";
 import { validateSchema } from "../../src/api/utils/SchemaValidator";
 import {
   createTestUser,
@@ -64,7 +64,7 @@ test.describe("User Registration API", () => {
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
 
-    const body = (await response.json()) as UserRegistration;
+    const body = await response.json();
     validateSchema(userRegistrationSchema, body);
 
     expect(body.message).toBe(API_MESSAGES.USER_CREATED);
@@ -77,7 +77,7 @@ test.describe("User Registration API", () => {
     const response = await userApi.register(userData);
     expect(response.status()).toBe(HTTP_STATUS.CREATED);
 
-    const body = (await response.json()) as UserRegistration;
+    const body = await response.json();
     validateSchema(userRegistrationSchema, body);
 
     expect(body.message).toBe(API_MESSAGES.USER_CREATED);
