@@ -178,6 +178,60 @@ Each UI matrix job installs only the browser required by that matrix entry.
 
 CI should avoid unnecessary work when execution responsibility can be expressed explicitly.
 
+### CI Execution Hardening
+
+CI execution includes explicit controls for efficiency, isolation, and diagnostic completeness.
+
+Dependency installation uses the npm package cache while preserving `npm ci` as the reproducible installation boundary.
+
+```text
+npm cache
+→ reuse downloaded package data
+
+npm ci
+→ clean lockfile-based dependency installation
+```
+
+Caching must improve execution efficiency without bypassing deterministic dependency installation.
+
+Workflow concurrency groups executions by workflow and logical change. Newer executions cancel obsolete in-progress executions for the same pull request or branch without cancelling unrelated pull requests.
+
+```text
+same workflow
++
+same pull request or branch
+→ same concurrency group
+→ newer run cancels obsolete run
+```
+
+CI jobs use explicit job-level timeouts as safety ceilings against stuck or unexpectedly long-running execution.
+
+Current limits are:
+
+```text
+quality
+→ 5 minutes
+
+api
+→ 10 minutes
+
+ui matrix job
+→ 10 minutes per browser
+```
+
+These limits are safety boundaries rather than expected execution durations.
+
+The browser matrix uses `fail-fast: false`. A failure in one browser must not automatically cancel the remaining browser jobs.
+
+```text
+Chromium failure
+→ Firefox continues
+→ WebKit continues
+→ complete cross-browser diagnostic signal
+```
+
+This intentionally favors diagnostic completeness across supported browsers over cancelling the matrix after the first browser-specific failure.
+
 ## CI Environment Model
 
 CI execution context and test target environment are separate concepts.

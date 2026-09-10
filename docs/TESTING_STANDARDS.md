@@ -545,6 +545,71 @@ Prettier
 → TypeScript typecheck
 ```
 
+## CI Hardening Standard
+
+CI optimization must not weaken reproducibility or diagnostic quality.
+
+Use the npm package cache to reduce repeated dependency download cost while preserving:
+
+```text
+npm ci
+```
+
+as the required CI dependency installation command.
+
+Do not replace reproducible installation with a cached `node_modules` directory merely to reduce execution time.
+
+Workflow concurrency should cancel obsolete executions belonging to the same logical pull request or branch while keeping unrelated changes isolated.
+
+```text
+same logical change
+→ newer run may cancel older run
+
+different pull requests
+→ independent execution
+```
+
+CI jobs must define reasonable job-level timeout ceilings.
+
+Current limits:
+
+```text
+quality
+→ 5 minutes
+
+api
+→ 10 minutes
+
+ui
+→ 10 minutes per browser matrix job
+```
+
+Timeout ceilings protect runner resources from stuck execution. They must not be increased merely to hide unexplained performance degradation or flaky behavior.
+
+Browser matrix execution uses:
+
+```text
+fail-fast: false
+```
+
+A failure in one browser should not cancel the remaining browser jobs because the complete matrix provides browser-specific diagnostic information.
+
+Retries are a resilience and diagnostic mechanism, not a flaky-test solution.
+
+```text
+first attempt passes
+→ healthy signal
+
+first attempt fails
+→ retry passes
+→ potential flakiness
+→ investigate
+```
+
+A test that repeatedly requires retries must not be treated as equivalent to a consistently passing test.
+
+Flaky tests should be investigated and corrected. If temporary quarantine becomes necessary, it should have an explicit reason, ownership, and path back to normal execution rather than becoming permanent ignored coverage.
+
 ## CI Browser Installation Standard
 
 Install only the runtime required by the job.
