@@ -1,4 +1,5 @@
 import { type Locator, type Page } from "@playwright/test";
+
 import type { TaskPriority, TaskStatus } from "../api/constants/task";
 
 export class TasksDashboardPage {
