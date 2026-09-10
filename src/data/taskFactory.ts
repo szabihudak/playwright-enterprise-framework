@@ -3,19 +3,19 @@ import type { TaskRequest } from "../api/schemas/TaskRequestSchema";
 
 export type CompleteTaskRequest = Required<TaskRequest>;
 
-type CreateTaskRequestOptions = {
+type CreateTaskOptions = {
   title?: string;
   description?: string;
   priority?: TaskPriority;
   status?: TaskStatus;
 };
 
-type CreateTaskPayloadOptions = CreateTaskRequestOptions & {
+type CreateTaskPayloadOptions = CreateTaskOptions & {
   missingFields?: (keyof TaskRequest)[];
 };
 
 export function createTask(
-  options: CreateTaskRequestOptions = {},
+  options: CreateTaskOptions = {},
 ): CompleteTaskRequest {
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
