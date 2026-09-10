@@ -1,4 +1,5 @@
 import { type Locator, type Page } from "@playwright/test";
+
 import type { TestUser } from "../api/models/User";
 
 export class RegisterPage {

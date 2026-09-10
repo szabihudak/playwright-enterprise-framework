@@ -10,22 +10,14 @@ test.describe("Task Dashboard tests", () => {
 
     await tasksDashboardPage.goto();
 
+    await expect(tasksDashboardPage.taskTitle(request.title)).toHaveText(
+      request.title,
+    );
     await expect(
-      tasksDashboardPage.taskTitle(request.title),
-    ).toHaveText(request.title);
-
-    await expect(
-      tasksDashboardPage.taskDescription(
-        request.title,
-        request.description,
-      ),
+      tasksDashboardPage.taskDescription(request.title, request.description),
     ).toHaveText(request.description);
-
     await expect(
-      tasksDashboardPage.taskPriority(
-        request.title,
-        request.priority,
-      ),
+      tasksDashboardPage.taskPriority(request.title, request.priority),
     ).toHaveText(request.priority);
   });
 
@@ -34,18 +26,15 @@ test.describe("Task Dashboard tests", () => {
     tasksDashboardPage,
   }) => {
     await mockTasksServerError(authenticatedPage);
+
     await tasksDashboardPage.goto();
 
-    await expect(
-      tasksDashboardPage.emptyColumn("backlog"),
-    ).toHaveText("No tasks");
-
-    await expect(
-      tasksDashboardPage.emptyColumn("in_progress"),
-    ).toHaveText("No tasks");
-
-    await expect(
-      tasksDashboardPage.emptyColumn("done"),
-    ).toHaveText("No tasks");
+    await expect(tasksDashboardPage.emptyColumn("backlog")).toHaveText(
+      "No tasks",
+    );
+    await expect(tasksDashboardPage.emptyColumn("in_progress")).toHaveText(
+      "No tasks",
+    );
+    await expect(tasksDashboardPage.emptyColumn("done")).toHaveText("No tasks");
   });
 });

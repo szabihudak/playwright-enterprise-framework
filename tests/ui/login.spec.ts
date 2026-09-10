@@ -14,9 +14,7 @@ test.describe("Authentication", () => {
     );
 
     await expect(loginPage.page).toHaveURL(/\/dashboard/);
-
     await expect(navigation.userMenuButton).toBeVisible();
-
     await expect(navigation.loginLink).not.toBeVisible();
   });
 });

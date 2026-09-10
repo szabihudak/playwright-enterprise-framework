@@ -1,5 +1,5 @@
 import { type Locator, type Page } from "@playwright/test";
-import type { TaskStatus } from "../api/constants/task";
+import type { TaskPriority, TaskStatus } from "../api/constants/task";
 
 export class TasksDashboardPage {
   readonly page: Page;
@@ -8,11 +8,9 @@ export class TasksDashboardPage {
 
   constructor(page: Page) {
     this.page = page;
-
     this.heading = page.getByRole("heading", {
       name: /tasks|dashboard/i,
     });
-
     this.taskCards = page.locator('[data-testid^="task-card-"]');
   }
 
@@ -38,7 +36,7 @@ export class TasksDashboardPage {
     });
   }
 
-  taskPriority(title: string, priority: string): Locator {
+  taskPriority(title: string, priority: TaskPriority): Locator {
     return this.taskCardByTitle(title).getByText(priority, {
       exact: true,
     });

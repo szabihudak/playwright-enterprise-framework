@@ -13,11 +13,8 @@ test.describe("Authenticated user", () => {
     await navigation.openUserMenu();
 
     await expect(navigation.userName).toHaveText(authenticatedTestUser.name);
-
     await expect(navigation.userEmail).toHaveText(authenticatedTestUser.email);
-
     await expect(navigation.dashboardLink).toBeVisible();
-
     await expect(navigation.loginLink).not.toBeVisible();
   });
 });

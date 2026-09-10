@@ -3,11 +3,9 @@ import { type Locator, type Page } from "@playwright/test";
 export class NavigationBar {
   readonly page: Page;
   readonly navigation: Locator;
-
   readonly logoLink: Locator;
   readonly loginLink: Locator;
   readonly registerLink: Locator;
-
   readonly userMenuButton: Locator;
   readonly userName: Locator;
   readonly userEmail: Locator;
