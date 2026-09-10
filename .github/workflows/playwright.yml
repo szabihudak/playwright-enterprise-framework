@@ -14,7 +14,7 @@ env:
   TEST_ENV: hosted
 
 jobs:
-  test:
+  quality:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,24 +35,82 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+  api:
+    needs: quality
+    runs-on: ubuntu-latest
 
-      - name: Run Playwright tests
-        run: npm test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Upload Playwright report
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run API tests
+        run: npx playwright test --project=api
+
+      - name: Upload API report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-api
           path: playwright-report/
           retention-days: 7
 
-      - name: Upload failure diagnostics
+      - name: Upload API failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-api
+          path: test-results/
+          retention-days: 7
+
+  ui:
+    needs: quality
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        browser:
+          - chromium
+          - firefox
+          - webkit
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run UI tests
+        run: npx playwright test --project=${{ matrix.browser }}
+
+      - name: Upload UI report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload UI failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.browser }}
           path: test-results/
           retention-days: 7
