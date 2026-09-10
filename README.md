@@ -1,9 +1,443 @@
 # Playwright Enterprise Framework
 
-Enterprise-grade Playwright + TypeScript automation framework.
+A production-oriented test automation framework built with **Playwright** and **TypeScript**, designed to demonstrate scalable Quality Engineering practices across API and browser testing.
 
-> Work in progress.
+The project focuses on maintainable architecture, runtime API contract validation, reusable test infrastructure, deterministic test data, programmatic authentication, and CI execution designed around test responsibility.
 
-## Vision
+> This framework is actively evolving as additional Quality Engineering capabilities are introduced.
 
-Build a modern automation framework demonstrating enterprise-level quality engineering practices.
+## Overview
+
+This repository demonstrates how a Playwright test suite can evolve beyond individual automated tests into a structured Quality Engineering framework.
+
+The framework currently provides:
+
+- API and UI automation with Playwright;
+- schema-first API contract validation with TypeBox and AJV;
+- domain-specific API clients;
+- deterministic test-data factories;
+- reusable Playwright fixtures;
+- programmatic API and browser authentication;
+- Page Object and Component Object patterns;
+- network mocking for controlled UI scenarios;
+- cross-browser UI execution;
+- dedicated browser-independent API execution;
+- GitHub Actions CI with quality gates;
+- browser matrix execution;
+- Playwright reports and failure diagnostics;
+- explicit architecture and testing standards for human and AI-assisted development.
+
+The framework is intentionally extended only when new capabilities demonstrate a real architectural need.
+
+## Technology Stack
+
+| Area                      | Technology                    |
+| ------------------------- | ----------------------------- |
+| Test Framework            | Playwright                    |
+| Language                  | TypeScript                    |
+| API Testing               | Playwright APIRequestContext  |
+| Runtime Schema Validation | TypeBox + AJV                 |
+| UI Automation             | Playwright Browser Automation |
+| CI/CD                     | GitHub Actions                |
+| Formatting                | Prettier                      |
+| Target Application        | UPEX DOJO                     |
+
+## Architecture
+
+The framework separates test behavior from reusable infrastructure.
+
+### API flow
+
+```text
+Spec
+  ↓
+Fixture
+  ↓
+Factory
+  ↓
+Domain API Client
+  ↓
+TypeBox Schema
+  ├── Static<T> → compile-time type
+  └── AJV → runtime validation
+  ↓
+HTTP assertion
+  ↓
+Schema validation
+  ↓
+Business assertions
+```
+
+Successful provider responses are validated at runtime before their data is trusted by the test.
+
+### UI flow
+
+```text
+Spec
+  ↓
+Fixture
+  ↓
+Page Object / Component Object
+  ↓
+Playwright Page
+  ↓
+Application UI
+```
+
+API and programmatic setup are used where appropriate to keep UI tests focused on the browser behavior being verified.
+
+For the complete architectural rules, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## Repository Structure
+
+```text
+config/
+  environments/
+
+docs/
+  adr/
+
+performance/
+  k6/
+
+src/
+  api/
+    clients/
+    constants/
+    models/
+    schemas/
+  components/
+  pages/
+  fixtures/
+  data/
+  mocks/
+  security/
+  accessibility/
+  ai/
+  utils/
+  reporting/
+
+tests/
+  api/
+  ui/
+  smoke/
+  regression/
+  accessibility/
+  visual/
+  security/
+  performance/
+
+.github/
+  workflows/
+```
+
+Some directories represent planned framework capabilities and will be populated as those capabilities are introduced.
+
+## API Testing
+
+API tests are implemented as browser-independent Playwright tests.
+
+The framework uses a schema-first contract strategy:
+
+```text
+HTTP response
+    ↓
+status assertion
+    ↓
+parse response
+    ↓
+runtime schema validation
+    ↓
+typed business assertions
+```
+
+TypeBox schemas provide both compile-time TypeScript types and runtime contracts validated through AJV.
+
+This prevents provider responses from being trusted through TypeScript casting alone.
+
+API clients remain responsible for HTTP interaction, while assertions remain in the test layer.
+
+## UI Testing
+
+UI automation follows Page Object and Component Object boundaries.
+
+Page Objects represent page-level behavior, while Component Objects encapsulate reusable UI regions.
+
+Authentication setup is separated from the behavior under test. Protected UI scenarios use a programmatically authenticated browser context rather than repeating UI login unless login itself is the scenario being tested.
+
+Locator scope follows the actual application DOM, including support for portal-rendered UI elements.
+
+## Authentication
+
+The target application exposes separate API and browser authentication mechanisms:
+
+```text
+API authentication
+→ Bearer JWT
+
+Browser authentication
+→ Auth.js session
+```
+
+The framework preserves this distinction through explicit fixture states:
+
+```text
+testUserData
+→ generated only
+
+registeredTestUser
+→ registered through API
+
+authenticatedTestUser
+→ registered + API authenticated
+
+authenticatedPage
+→ programmatically authenticated browser context
+```
+
+This keeps setup fast while preserving correct authentication boundaries.
+
+## Test Data
+
+Reusable test data is generated through domain factories.
+
+Factories provide valid defaults with explicit overrides:
+
+```text
+valid defaults
++
+scenario overrides
+=
+test-specific data
+```
+
+Negative tests can intentionally generate partial or invalid payloads when required.
+
+Factories remain independent from HTTP execution, UI interaction, assertions, and fixture lifecycle.
+
+## CI Pipeline
+
+GitHub Actions provides automated quality validation and test execution.
+
+Current execution architecture:
+
+```text
+quality
+    ↓
+    ├── api
+    │   └── API tests
+    │
+    └── ui matrix
+        ├── Chromium
+        ├── Firefox
+        └── WebKit
+```
+
+The quality gate currently validates:
+
+```text
+Prettier
+→ TypeScript typecheck
+```
+
+API tests execute once because they are browser-independent.
+
+UI and smoke tests execute through browser-specific Playwright projects using a GitHub Actions matrix.
+
+Each UI job installs only the browser required for that execution.
+
+## Playwright Projects
+
+The current project ownership is:
+
+```text
+api
+→ tests/api/**
+
+chromium
+firefox
+webkit
+→ tests/ui/**
+→ tests/smoke/**
+```
+
+This prevents HTTP-only API tests from being redundantly executed once per browser while preserving cross-browser coverage where browser behavior matters.
+
+## Reports and Diagnostics
+
+CI preserves execution evidence through Playwright artifacts.
+
+```text
+HTML report
+→ uploaded for every test execution
+
+Failure diagnostics
+→ uploaded when execution fails
+```
+
+Artifacts are separated by execution responsibility and browser so failures remain attributable to the correct job.
+
+Playwright is configured to retain additional diagnostics for failed or retried execution, including screenshots, video, and traces according to the configured policy.
+
+## Environment Configuration
+
+The framework supports explicit target environments through `TEST_ENV`.
+
+Current environment definitions include:
+
+```text
+hosted
+local
+ci
+```
+
+The GitHub Actions workflow explicitly targets:
+
+```text
+TEST_ENV=hosted
+```
+
+CI execution context and test target environment are intentionally treated as separate concepts.
+
+## Running Locally
+
+Install dependencies:
+
+```bash
+npm ci
+```
+
+Install Playwright browsers:
+
+```bash
+npx playwright install
+```
+
+Run the complete configured test suite:
+
+```bash
+npm test
+```
+
+Run API tests only:
+
+```bash
+npx playwright test --project=api
+```
+
+Run a browser project:
+
+```bash
+npx playwright test --project=chromium
+```
+
+Run formatting validation:
+
+```bash
+npx prettier --check .
+```
+
+Run TypeScript validation:
+
+```bash
+npm run typecheck
+```
+
+## Engineering Standards
+
+The repository contains explicit architecture and implementation standards.
+
+Before making framework changes, contributors should read:
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- [`docs/TESTING_STANDARDS.md`](docs/TESTING_STANDARDS.md)
+- [`AGENTS.md`](AGENTS.md)
+- relevant Architecture Decision Records under [`docs/adr/`](docs/adr/)
+
+The framework follows a simple extension rule:
+
+```text
+reuse
+→ extend
+→ create
+```
+
+New abstractions are introduced only when demonstrated responsibility, reuse, or complexity justifies them.
+
+## AI-Assisted Development
+
+The repository is structured to support AI-assisted engineering without allowing generated code to define the architecture.
+
+AI coding agents are instructed to:
+
+- inspect existing implementations before generating code;
+- follow documented architectural boundaries;
+- use equivalent implementations as golden references;
+- reuse or extend existing abstractions before creating new ones;
+- preserve schema-first API contracts;
+- preserve authentication and fixture boundaries;
+- select the correct Playwright execution project;
+- validate formatting, types, and affected tests before completion.
+
+Repository-level agent behavior is defined in [`AGENTS.md`](AGENTS.md), with GitHub Copilot-specific instructions in [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+
+Architecture drives generated code, not the other way around.
+
+## Target Application
+
+The framework currently tests **UPEX DOJO**, a full-stack application exposing both browser workflows and REST APIs.
+
+The target provides realistic scenarios for:
+
+- user registration and authentication;
+- authenticated browser sessions;
+- task management;
+- API contract testing;
+- API/UI integration;
+- negative testing;
+- controlled network failure scenarios.
+
+The framework treats the target application as an external provider and models observed runtime behavior rather than assuming undocumented contracts.
+
+## Project Status
+
+Current implemented foundation:
+
+```text
+Framework architecture        ✅
+Reusable fixtures             ✅
+Test-data factories           ✅
+API automation                ✅
+API authentication            ✅
+Runtime contract validation   ✅
+API/UI integration            ✅
+Network mocking               ✅
+Page/Component architecture   ✅
+Programmatic browser auth     ✅
+Cross-browser execution       ✅
+GitHub Actions CI             ✅
+CI quality gates              ✅
+CI artifacts                  ✅
+Browser matrix execution      ✅
+Agent engineering standards   ✅
+```
+
+Additional Quality Engineering capabilities will be introduced as the framework evolves.
+
+## Design Philosophy
+
+The goal of this repository is not to maximize abstraction or demonstrate the largest possible number of tools.
+
+The framework favors:
+
+- explicit responsibility boundaries;
+- type safety;
+- runtime validation;
+- reusable but focused abstractions;
+- deterministic setup;
+- maintainable test structure;
+- efficient CI execution;
+- meaningful diagnostics;
+- documented architectural decisions.
+
+A passing test is necessary, but maintainability, reliability, and architectural consistency are part of the definition of quality.
