@@ -76,21 +76,33 @@ New testing capabilities should be addable without requiring major redesign of t
 
 ## Target Test Application
 
-The initial target application will be a RealWorld-compatible application.
+The framework currently targets UPEX DOJO, a production-like web application used to demonstrate enterprise Quality Engineering practices across UI and API layers.
 
-The application is suitable because it provides realistic workflows such as:
+Application:
 
-- user registration
-- authentication
-- user profiles
-- article CRUD operations
-- comments
-- favorites
-- feeds
-- API access
-- token-based authentication
+- Live application: `https://dojo.upexgalaxy.com`
+- API documentation: `https://dojo.upexgalaxy.com/api/docs`
+- Source repository: `upex-galaxy/upex-dojo`
 
-This provides enough complexity to demonstrate both UI and API Quality Engineering practices.
+The application provides realistic workflows including:
+
+- user registration;
+- authentication;
+- authenticated user sessions;
+- task management;
+- task CRUD operations;
+- REST API access;
+- token-based API authentication;
+- browser session authentication;
+- API and UI workflow composition;
+- network interception and mocking.
+
+The application intentionally supports two authentication contexts used by the framework:
+
+- REST API authentication through Bearer JWT tokens;
+- browser authentication through an Auth.js session.
+
+This distinction allows the framework to demonstrate realistic API setup, programmatic browser authentication, authenticated UI testing, and API/UI composition without relying on slow UI-based setup.
 
 ## Out of Scope for Initial Version
 
