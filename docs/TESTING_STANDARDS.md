@@ -157,8 +157,8 @@ test("creates a task", async ({ taskApi, authenticatedTestUser }) => {
   const request = createTask();
 
   const response = await taskApi.createTask(
-    authenticatedTestUser.accessToken,
     request,
+    authenticatedTestUser.accessToken,
   );
   expect(response.status()).toBe(201);
 
