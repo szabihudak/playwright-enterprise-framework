@@ -7,14 +7,9 @@ export const taskResponseSchema = Type.Object(
     userId: Type.String(),
     title: Type.String(),
 
-    description: Type.Union([
-      Type.String(),
-      Type.Null(),
-    ]),
+    description: Type.Union([Type.String(), Type.Null()]),
 
-    status: Type.Union(
-      TASK_STATUSES.map((status) => Type.Literal(status)),
-    ),
+    status: Type.Union(TASK_STATUSES.map((status) => Type.Literal(status))),
 
     priority: Type.Union(
       TASK_PRIORITIES.map((priority) => Type.Literal(priority)),

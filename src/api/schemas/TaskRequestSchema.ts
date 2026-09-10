@@ -9,15 +9,11 @@ export const taskRequestSchema = Type.Object(
     description: Type.Optional(Type.String()),
 
     priority: Type.Optional(
-      Type.Union(
-        TASK_PRIORITIES.map((priority) => Type.Literal(priority)),
-      ),
+      Type.Union(TASK_PRIORITIES.map((priority) => Type.Literal(priority))),
     ),
 
     status: Type.Optional(
-      Type.Union(
-        TASK_STATUSES.map((status) => Type.Literal(status)),
-      ),
+      Type.Union(TASK_STATUSES.map((status) => Type.Literal(status))),
     ),
   },
   {
