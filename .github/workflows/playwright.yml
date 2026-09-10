@@ -7,6 +7,12 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+env:
+  TEST_ENV: hosted
+
 jobs:
   test:
     runs-on: ubuntu-latest
