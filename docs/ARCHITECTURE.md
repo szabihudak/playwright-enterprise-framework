@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the architectural boundaries, responsibilities, and dependency rules of the Playwright Enterprise Framework.
+This document defines the architectural boundaries, responsibilities, execution model, and dependency rules of the Playwright Enterprise Framework.
 
 The architecture is designed to remain maintainable and predictable as the test suite grows. Tests should express business behavior while reusable technical concerns are delegated to the appropriate framework layer.
 
@@ -21,6 +21,9 @@ The framework follows these principles:
 - fixtures manage reusable setup, state, and lifecycle;
 - Page Objects and Component Objects encapsulate UI interaction;
 - assertions remain in tests unless validation belongs to an infrastructure boundary;
+- test execution scope should reflect the responsibility being tested;
+- browser-independent API tests should not be multiplied across browser projects;
+- browser-dependent UI tests should execute against the intended browser projects;
 - abstractions are introduced only when there is demonstrated reuse or architectural value;
 - existing patterns should be extended before parallel patterns are created.
 
@@ -108,6 +111,146 @@ Application UI
 ```
 
 API and UI flows may be composed when API setup provides faster or more reliable prerequisites for UI behavior.
+
+## Test Execution Architecture
+
+The framework separates browser-independent API execution from browser-dependent UI execution.
+
+Playwright projects represent execution responsibility rather than simply duplicating the full suite across multiple browser configurations.
+
+Current project boundaries:
+
+```text
+api
+→ tests/api/**
+→ browser-independent
+→ executed once
+
+chromium
+→ tests/ui/**
+→ tests/smoke/**
+→ Chromium browser coverage
+
+firefox
+→ tests/ui/**
+→ tests/smoke/**
+→ Firefox browser coverage
+
+webkit
+→ tests/ui/**
+→ tests/smoke/**
+→ WebKit browser coverage
+```
+
+API tests use Playwright's HTTP capabilities and do not validate browser-engine behavior. They must therefore not be multiplied across Chromium, Firefox, and WebKit projects.
+
+UI and smoke tests validate browser-visible behavior and may run across multiple browser projects because rendering, interaction, and browser behavior can differ.
+
+This separation avoids redundant API execution while preserving cross-browser UI coverage.
+
+## CI Execution Architecture
+
+CI execution is organized by responsibility.
+
+The current GitHub Actions dependency model is:
+
+```text
+quality
+├── formatting
+└── typecheck
+    ↓
+    ├── api
+    │   └── API tests once
+    │
+    └── ui matrix
+        ├── chromium
+        ├── firefox
+        └── webkit
+```
+
+The `api` and `ui` jobs depend on the successful completion of the `quality` job but do not depend on one another.
+
+This allows API and UI execution to proceed independently and in parallel after static quality validation succeeds.
+
+The API job does not install browser binaries because browser execution is not required.
+
+Each UI matrix job installs only the browser required by that matrix entry.
+
+CI should avoid unnecessary work when execution responsibility can be expressed explicitly.
+
+## CI Environment Model
+
+CI execution context and test target environment are separate concepts.
+
+```text
+CI execution context
+→ GitHub Actions
+→ process.env.CI
+
+Test target environment
+→ selected through TEST_ENV
+```
+
+The current CI workflow explicitly targets:
+
+```text
+TEST_ENV=hosted
+```
+
+This makes CI intent explicit rather than relying on the framework's default environment.
+
+A future change to the default test environment must not silently redirect CI execution to another target.
+
+## CI Permissions
+
+Test workflows follow least-privilege principles.
+
+The current workflow requires repository content read access and does not require repository write access.
+
+```text
+permissions:
+  contents: read
+```
+
+Additional permissions should be introduced only when a workflow capability demonstrates a concrete need.
+
+Secrets must not be introduced merely to demonstrate secret support. Sensitive values should be stored in an appropriate secret store only when a real runtime credential requirement exists.
+
+## CI Artifact Strategy
+
+Playwright generates test reports and failure diagnostics. CI is responsible for preserving those outputs when useful.
+
+Current artifact strategy:
+
+```text
+HTML report
+→ uploaded for successful and failed executions
+
+Failure diagnostics
+→ uploaded only when test execution fails
+```
+
+Artifacts are named by execution responsibility to avoid collisions and improve diagnostics.
+
+Examples:
+
+```text
+playwright-report-api
+
+playwright-report-chromium
+playwright-report-firefox
+playwright-report-webkit
+
+test-results-api
+
+test-results-chromium
+test-results-firefox
+test-results-webkit
+```
+
+Matrix jobs execute on independent runners, so identical local output paths are acceptable. Artifact upload names must remain unique when outputs originate from separate jobs.
+
+Artifact retention should be intentional and should balance diagnostic value with storage cost.
 
 ## Layer Responsibilities
 
@@ -336,6 +479,29 @@ Objects must be constructed from the `Page` belonging to the context they operat
 
 A Page Object or Component Object created from the default `page` fixture must not be reused against `authenticatedPage`.
 
+## Execution Boundary Rules
+
+Test placement and Playwright project ownership must remain aligned.
+
+Use:
+
+```text
+tests/api/**
+→ API project
+
+tests/ui/**
+→ browser projects
+
+tests/smoke/**
+→ browser projects
+```
+
+Do not place browser-dependent behavior under the API suite.
+
+Do not place browser-independent API contract tests under UI or smoke suites merely to force execution through browser projects.
+
+If a new test type requires a materially different execution model, introduce the smallest explicit project boundary required by the behavior rather than extending unrelated projects.
+
 ## Abstraction Rules
 
 Before creating a new abstraction, determine whether the existing architecture can be extended.
@@ -368,6 +534,8 @@ An ADR should be considered when a change:
 - introduces a major external technology;
 - changes authentication strategy;
 - significantly changes execution or deployment architecture.
+
+Changes to test-project boundaries or CI execution responsibilities should be documented when they alter how suites are selected, distributed, or validated.
 
 When implementation and documentation disagree, the discrepancy should be resolved rather than allowing the documentation to become stale.
 

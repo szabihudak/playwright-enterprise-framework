@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the implementation standards for creating and modifying tests in the Playwright Enterprise Framework.
+This document defines the implementation standards for creating, modifying, placing, and executing tests in the Playwright Enterprise Framework.
 
 `ARCHITECTURE.md` defines where responsibilities belong and why. This document defines how those architectural rules are applied during implementation.
 
@@ -10,7 +10,7 @@ These standards apply to both human contributors and AI-assisted development.
 
 ## Core Rule
 
-Before writing code, inspect the existing implementation and determine which framework layers are actually required.
+Before writing code, inspect the existing implementation and determine which framework layers and execution boundaries are actually required.
 
 Do not create a new abstraction merely because a new test is being added.
 
@@ -39,6 +39,8 @@ Find an analogous existing test
         ↓
 Identify required framework layers
         ↓
+Identify required execution project
+        ↓
 Reuse existing layers where possible
         ↓
 Extend existing layers where appropriate
@@ -51,7 +53,7 @@ Format
         ↓
 Typecheck
         ↓
-Run affected tests
+Run affected project
         ↓
 Review architecture impact
 ```
@@ -60,10 +62,57 @@ Before implementation, answer:
 
 1. What behavior is being verified?
 2. Is this primarily API, UI, or composed API/UI behavior?
-3. Is there an existing test demonstrating a similar pattern?
-4. Which existing framework components can be reused?
-5. Which components genuinely need modification?
-6. Is any new abstraction actually required?
+3. Is the behavior browser-independent or browser-dependent?
+4. Which Playwright project should own the test?
+5. Is there an existing test demonstrating a similar pattern?
+6. Which existing framework components can be reused?
+7. Which components genuinely need modification?
+8. Is any new abstraction actually required?
+
+## Test Placement and Project Selection
+
+Test location communicates execution responsibility.
+
+Current ownership:
+
+```text
+tests/api/**
+→ api project
+
+tests/ui/**
+→ chromium
+→ firefox
+→ webkit
+
+tests/smoke/**
+→ chromium
+→ firefox
+→ webkit
+```
+
+API tests are browser-independent and must execute through the dedicated `api` project.
+
+UI and smoke tests are browser-dependent and execute through browser projects.
+
+Do not allow API tests to run once per browser simply because browser projects exist.
+
+Do not use browser projects for HTTP-only contract validation.
+
+When adding a new API test:
+
+```text
+place under tests/api
+→ execute with --project=api
+```
+
+When adding a new UI or smoke test:
+
+```text
+place under tests/ui or tests/smoke
+→ execute through the intended browser project
+```
+
+If the test behavior does not fit an existing execution boundary, review the architecture before introducing a new project.
 
 ## Layer Decision Guide
 
@@ -109,7 +158,8 @@ Before creating a new file or abstraction:
 1. search for an existing implementation with the same responsibility;
 2. inspect at least one analogous implementation;
 3. determine whether the existing component can be extended;
-4. preserve the established structural pattern where the responsibility is equivalent.
+4. preserve the established structural pattern where the responsibility is equivalent;
+5. inspect the execution project used by the analogous test.
 
 For example:
 
@@ -120,6 +170,7 @@ New user API behavior
 → inspect userFactory
 → inspect relevant fixtures
 → inspect existing user API specs
+→ keep execution in the api project
 ```
 
 or:
@@ -131,6 +182,7 @@ New task UI behavior
 → inspect taskFactory
 → inspect authenticated fixtures
 → inspect existing task UI specs
+→ keep execution in browser projects
 ```
 
 Existing implementations are reference patterns, not templates to copy blindly.
@@ -189,6 +241,8 @@ validateSchema(taskResponseSchema, body);
 
 After validation, TypeScript may safely use the schema-derived type.
 
+API tests belong to the dedicated `api` project and should not depend on browser installation or browser-engine execution.
+
 ## Negative API Test Standard
 
 Negative tests should normally follow:
@@ -208,6 +262,8 @@ Do not validate an error response against a successful response schema.
 Do not introduce a generic error schema merely for structural symmetry.
 
 Use a reusable error schema only when the provider exposes a stable, meaningful error contract that benefits from runtime validation.
+
+Negative API tests remain browser-independent unless browser behavior itself is part of the scenario.
 
 ## API Client Standard
 
@@ -424,6 +480,10 @@ The test structure should communicate these phases without commentary.
 
 Comments should explain non-obvious reasons rather than restating code.
 
+UI and smoke tests must remain compatible with the browser projects that own them.
+
+Do not introduce browser-specific behavior into a shared test unless the difference is intentional and documented.
+
 ## API/UI Composition
 
 Prefer API or programmatic setup when UI setup would make a test slower, more brittle, or unrelated to the behavior under test.
@@ -440,6 +500,10 @@ Do not use UI flows merely because the final assertion is a UI assertion.
 
 The setup mechanism should serve the behavior being tested.
 
+An API-assisted UI test remains a browser-dependent UI test when the observable behavior under validation is UI behavior.
+
+Its execution ownership therefore remains with the browser projects rather than the API project.
+
 ## Mock Standard
 
 Before creating a mock:
@@ -451,6 +515,190 @@ Before creating a mock:
 5. keep assertions in the spec.
 
 Do not create a generic mock abstraction before repeated mocking behavior demonstrates a need.
+
+A mocked UI test remains browser-dependent if it verifies UI behavior.
+
+## CI Execution Standard
+
+The current CI dependency model is:
+
+```text
+quality
+    ↓
+    ├── api
+    └── ui matrix
+        ├── chromium
+        ├── firefox
+        └── webkit
+```
+
+The `api` and `ui` jobs should depend on quality validation rather than on each other unless a genuine runtime dependency exists.
+
+Do not serialize independent jobs merely because they belong to the same workflow.
+
+The quality job should fail fast on inexpensive validation before expensive browser execution begins.
+
+Current quality gates include:
+
+```text
+Prettier
+→ TypeScript typecheck
+```
+
+## CI Browser Installation Standard
+
+Install only the runtime required by the job.
+
+API job:
+
+```text
+npm dependencies
+→ no browser binary required
+```
+
+UI matrix job:
+
+```text
+npm dependencies
+→ install matrix browser
+→ execute matching Playwright project
+```
+
+Do not install all browsers in every job when only one browser is required.
+
+## CI Environment Standard
+
+CI execution must explicitly select the intended test target.
+
+Current CI target:
+
+```text
+TEST_ENV=hosted
+```
+
+Do not rely on an implicit default environment for CI behavior when the intended target can be stated explicitly.
+
+The GitHub Actions `CI` environment variable and framework `TEST_ENV` variable represent different concerns:
+
+```text
+CI
+→ execution context
+
+TEST_ENV
+→ test target
+```
+
+Do not treat them as interchangeable.
+
+## CI Permission and Secret Standard
+
+Use least privilege for workflow permissions.
+
+A test workflow should not receive write access unless a concrete workflow requirement needs it.
+
+Sensitive values must not be hardcoded in workflow YAML.
+
+Do not introduce placeholder or demonstration secrets when the framework has no real secret requirement.
+
+When secrets are required:
+
+- store them in the appropriate secret store;
+- expose them only to trusted execution contexts;
+- do not log their values;
+- do not provide trusted secrets to untrusted PR code.
+
+## CI Artifact Standard
+
+Use artifacts to preserve human-readable test reports and failure diagnostics.
+
+Preferred strategy:
+
+```text
+HTML report
+→ always upload
+
+Failure diagnostics
+→ upload on failure
+```
+
+Artifact names must identify their execution scope.
+
+Examples:
+
+```text
+playwright-report-api
+playwright-report-chromium
+playwright-report-firefox
+playwright-report-webkit
+
+test-results-api
+test-results-chromium
+test-results-firefox
+test-results-webkit
+```
+
+The artifact name and artifact path are separate concepts.
+
+For example:
+
+```text
+artifact name
+→ playwright-report-firefox
+
+local path
+→ playwright-report/
+```
+
+Matrix jobs may use the same local path because they execute on isolated runners.
+
+Do not duplicate the same report into multiple artifacts unless there is a demonstrated diagnostic need.
+
+Retention should be finite and intentional.
+
+## Matrix Standard
+
+Use a GitHub Actions matrix when the same CI responsibility should execute independently against multiple parameter values.
+
+Current browser matrix:
+
+```text
+chromium
+firefox
+webkit
+```
+
+Matrix execution provides:
+
+- parallel browser execution;
+- browser-specific failure signals;
+- browser-specific artifacts;
+- independent job isolation.
+
+A matrix is not the same as a Playwright project.
+
+```text
+Playwright project
+→ test configuration and ownership
+
+GitHub Actions matrix
+→ CI job replication and parameterization
+```
+
+Do not introduce a matrix when a single execution would provide equivalent coverage.
+
+## Sharding Standard
+
+Sharding divides a sufficiently large test suite into multiple execution partitions.
+
+Sharding should be introduced when runtime and test volume demonstrate a real need.
+
+Do not add sharding merely because the tooling supports it.
+
+Sharding does not determine which test category should execute once versus once per browser.
+
+Use project boundaries for execution responsibility.
+
+Use sharding for distributing test volume.
 
 ## Naming and Structure
 
@@ -489,6 +737,8 @@ Use Prettier as the formatting authority.
 
 Prettier does not decide semantic whitespace. Contributors remain responsible for removing unnecessary blank lines.
 
+CI must run Prettier in check mode rather than silently rewriting repository files.
+
 ## Comments
 
 Comments should explain why something non-obvious exists.
@@ -521,6 +771,9 @@ Before creating a new:
 - Component Object;
 - mock;
 - utility;
+- Playwright project;
+- CI job;
+- CI matrix dimension;
 
 ask:
 
@@ -549,6 +802,10 @@ Before considering a test implementation complete:
 ```text
 Behavior implemented
         ↓
+Correct test suite selected
+        ↓
+Correct Playwright project owns the test
+        ↓
 Architecture boundaries respected
         ↓
 Existing abstractions reused where appropriate
@@ -561,14 +818,16 @@ TypeScript typecheck passes
         ↓
 Affected tests pass
         ↓
-Relevant regression scope passes when appropriate
+Relevant project/regression scope passes when appropriate
+        ↓
+CI execution remains valid when shared execution config changes
         ↓
 Documentation updated if architecture or standards changed
 ```
 
 A passing test is necessary but not sufficient.
 
-The implementation should also preserve the maintainability and architectural consistency of the framework.
+The implementation should also preserve the maintainability, execution efficiency, and architectural consistency of the framework.
 
 ## AI-Assisted Development
 
@@ -593,10 +852,27 @@ schema
 → Page Object / Component
 → mock
 → spec
+→ execution configuration
 ```
 
 but only the layers required by the behavior should be modified.
 
-Agents should inspect existing implementations before deciding which layers are required.
+Agents should inspect existing implementations and project ownership before deciding which layers are required.
+
+When generating a new test, an agent must determine whether the behavior belongs to:
+
+```text
+api project
+```
+
+or:
+
+```text
+browser projects
+```
+
+before implementation.
+
+Agents must not cause browser-independent API tests to execute redundantly across browser projects.
 
 Architecture must drive generated code, not the other way around.
