@@ -1,5 +1,4 @@
 import { Type, type Static } from "@sinclair/typebox";
-
 import { TASK_PRIORITIES, TASK_STATUSES } from "../constants/task";
 
 export const taskRequestSchema = Type.Object(
