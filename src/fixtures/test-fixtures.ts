@@ -1,20 +1,17 @@
 import { test as base, expect, type Page } from "@playwright/test";
 
-import { getCurrentEnvironment } from "../utils/env";
+import { TaskApiClient } from "../api/clients/TaskApiClient";
+import { UserApiClient } from "../api/clients/UserApiClient";
+import type { AuthenticatedUser, TestUser } from "../api/models/User";
+import type { TaskResponse } from "../api/schemas/TaskResponseSchema";
+import { NavigationBar } from "../components/NavigationBar";
+import { createTask, type CompleteTaskRequest } from "../data/taskFactory";
+import { createTestUser } from "../data/userFactory";
 import { HomePage } from "../pages/HomePage";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
-import { NavigationBar } from "../components/NavigationBar";
-import { UserApiClient } from "../api/clients/UserApiClient";
-import { TaskApiClient } from "../api/clients/TaskApiClient";
-
-import type { AuthenticatedUser, TestUser } from "../api/models/User";
-import type { TaskResponse } from "../api/schemas/TaskResponseSchema";
-import type { CompleteTaskRequest } from "../data/taskFactory";
-
-import { createTestUser } from "../data/userFactory";
-import { createTask } from "../data/taskFactory";
 import { TasksDashboardPage } from "../pages/TasksDashboardPage";
+import { getCurrentEnvironment } from "../utils/env";
 
 type CreatedTask = {
   request: CompleteTaskRequest;
@@ -22,18 +19,18 @@ type CreatedTask = {
 };
 
 type AppFixtures = {
-  authenticatedTestUser: AuthenticatedUser;
-  authenticatedPage: Page;
-  createdTask: CreatedTask;
   homePage: HomePage;
   loginPage: LoginPage;
+  registerPage: RegisterPage;
   navigation: NavigationBar;
   userApi: UserApiClient;
   taskApi: TaskApiClient;
-  tasksDashboardPage: TasksDashboardPage;
   testUserData: TestUser;
-  registerPage: RegisterPage;
   registeredTestUser: TestUser;
+  authenticatedTestUser: AuthenticatedUser;
+  createdTask: CreatedTask;
+  authenticatedPage: Page;
+  tasksDashboardPage: TasksDashboardPage; 
 };
 
 export const test = base.extend<AppFixtures>({
@@ -49,20 +46,16 @@ export const test = base.extend<AppFixtures>({
     await use(new RegisterPage(page));
   },
 
-  taskApi: async ({ request }, use) => {
-    await use(new TaskApiClient(request));
-  },
-
-  tasksDashboardPage: async ({ authenticatedPage }, use) => {
-    await use(new TasksDashboardPage(authenticatedPage));
-  },
-
   navigation: async ({ page }, use) => {
     await use(new NavigationBar(page));
   },
 
   userApi: async ({ request }, use) => {
     await use(new UserApiClient(request));
+  },
+
+  taskApi: async ({ request }, use) => {
+    await use(new TaskApiClient(request));
   },
 
   testUserData: async ({}, use) => {
@@ -140,6 +133,11 @@ export const test = base.extend<AppFixtures>({
 
     await context.close();
   },
+
+  tasksDashboardPage: async ({ authenticatedPage }, use) => {
+    await use(new TasksDashboardPage(authenticatedPage));
+  },
+
 });
 
 export { expect };
