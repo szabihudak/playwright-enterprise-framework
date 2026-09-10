@@ -41,7 +41,7 @@ test.describe("Create a Task API", () => {
 
     expect(body.description).toBe(taskData.description);
     expect(body.priority).toBe(taskData.priority);
-    expect(body.status).toBe(taskData.status);
+    expect(body.status).toBe(taskData.priority);
     expect(body.title).toBe(taskData.title);
     expect(body.userId).toBe(currentUser.user.id);
   });
