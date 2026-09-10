@@ -30,7 +30,7 @@ type AppFixtures = {
   authenticatedTestUser: AuthenticatedUser;
   createdTask: CreatedTask;
   authenticatedPage: Page;
-  tasksDashboardPage: TasksDashboardPage; 
+  tasksDashboardPage: TasksDashboardPage;
 };
 
 export const test = base.extend<AppFixtures>({
@@ -137,7 +137,6 @@ export const test = base.extend<AppFixtures>({
   tasksDashboardPage: async ({ authenticatedPage }, use) => {
     await use(new TasksDashboardPage(authenticatedPage));
   },
-
 });
 
 export { expect };
