@@ -79,6 +79,7 @@ New capabilities are introduced only when they demonstrate a real testing or arc
 - [CI Pipeline](#ci-pipeline)
 - [Running Locally](#running-locally)
 
+## Technology Stack
 
 | Area                      | Technology                    |
 | ------------------------- | ----------------------------- |
