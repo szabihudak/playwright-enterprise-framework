@@ -12,6 +12,7 @@ permissions:
 
 env:
   TEST_ENV: hosted
+  TEST_IMAGE: playwright-enterprise-tests:${{ github.sha }}
 
 concurrency:
   group: playwright-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -41,8 +42,31 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-  api:
+  build-image:
     needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Playwright test image
+        run: docker build -t "$TEST_IMAGE" .
+
+      - name: Save Playwright test image
+        run: docker save "$TEST_IMAGE" -o playwright-test-image.tar
+
+      - name: Upload Playwright test image
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-image
+          path: playwright-test-image.tar
+          retention-days: 1
+          compression-level: 0
+
+  api:
+    needs: build-image
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -50,17 +74,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download Playwright test image
+        uses: actions/download-artifact@v4
         with:
-          node-version: 22
-          cache: npm
+          name: playwright-test-image
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Load Playwright test image
+        run: docker load -i playwright-test-image.tar
 
       - name: Run API tests
-        run: npx playwright test --project=api
+        run: |
+          docker run --rm \
+            -e TEST_ENV="$TEST_ENV" \
+            -v "$PWD/playwright-report:/app/playwright-report" \
+            -v "$PWD/test-results:/app/test-results" \
+            "$TEST_IMAGE" \
+            npx playwright test --project=api
 
       - name: Upload API report
         if: always()
@@ -79,7 +108,7 @@ jobs:
           retention-days: 7
 
   ui:
-    needs: quality
+    needs: build-image
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -95,20 +124,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download Playwright test image
+        uses: actions/download-artifact@v4
         with:
-          node-version: 22
-          cache: npm
+          name: playwright-test-image
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Load Playwright test image
+        run: docker load -i playwright-test-image.tar
 
       - name: Run UI tests
-        run: npx playwright test --project=${{ matrix.browser }}
+        run: |
+          docker run --rm \
+            -e TEST_ENV="$TEST_ENV" \
+            -v "$PWD/playwright-report:/app/playwright-report" \
+            -v "$PWD/test-results:/app/test-results" \
+            "$TEST_IMAGE" \
+            npx playwright test --project=${{ matrix.browser }}
 
       - name: Upload UI report
         if: always()
