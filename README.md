@@ -26,31 +26,41 @@ The framework is designed around the concerns that matter in real automation sys
 
 ## Architecture at a Glance
 
-```text
-                    Playwright Test Suite
-                           │
-              ┌────────────┴────────────┐
-              │                         │
-         API Testing               UI Testing
-              │                         │
-       Domain Clients            Page / Components
-              │                         │
-       TypeBox Schemas              Fixtures
-              │                         │
-     AJV Runtime Validation     Programmatic Auth
-              │                         │
-              └────────────┬────────────┘
-                           │
-                    Test Infrastructure
-                           │
-              ┌────────────┴────────────┐
-              │                         │
-            Docker                GitHub Actions
-              │                         │
-      Reproducible Runtime       Quality Gates
-                                API Execution
-                                Browser Matrix
-                                Test Artifacts
+```mermaid
+flowchart TD
+    A[Playwright Test Suite]
+
+    A --> B[API Testing]
+    A --> C[UI Testing]
+
+    B --> D[Domain API Clients]
+    D --> E[TypeBox Schemas]
+    E --> F[AJV Runtime Validation]
+
+    C --> G[Page Objects / Component Objects]
+    G --> H[Playwright Fixtures]
+    H --> I[Programmatic Authentication]
+
+    F --> J[Test Infrastructure]
+    I --> J
+
+    J --> K[Docker]
+    J --> L[GitHub Actions]
+
+    K --> M[Reproducible Runtime]
+    K --> N[Runtime TEST_ENV]
+    K --> O[Ephemeral Containers]
+
+    L --> P[Quality Gates]
+    L --> Q[Single Image Build]
+    Q --> R[API Project]
+    Q --> S[UI Browser Matrix]
+
+    S --> T[Chromium]
+    S --> U[Firefox]
+    S --> V[WebKit]
+
+    L --> W[Test Reports & Failure Diagnostics]
 ```
 
 ## Engineering Approach
