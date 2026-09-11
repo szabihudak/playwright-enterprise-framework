@@ -1,12 +1,8 @@
 {
   "name": "playwright-enterprise-framework",
   "version": "1.0.0",
-  "description": "Enterprise-grade Playwright + TypeScript automation framework.",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "test": "tests"
-  },
+  "private": true,
+  "description": "Production-oriented Playwright + TypeScript test automation framework for API, UI, contract, Docker, and CI testing.",
   "scripts": {
     "test": "playwright test",
     "test:list": "playwright test --list",
@@ -14,9 +10,7 @@
     "test:debug": "playwright test --debug",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Szabolcs Hudak",
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
