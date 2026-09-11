@@ -1,36 +1,85 @@
 # Playwright Enterprise Framework
 
-A production-oriented test automation framework built with **Playwright** and **TypeScript**, designed to demonstrate scalable Quality Engineering practices across API and browser testing.
+A production-oriented **Playwright + TypeScript test automation framework** demonstrating scalable Quality Engineering practices across API and browser testing.
 
-The project focuses on maintainable architecture, runtime API contract validation, reusable test infrastructure, deterministic test data, programmatic authentication, reproducible containerized execution, and CI execution designed around test responsibility.
+The framework is designed around the concerns that matter in real automation systems: **maintainability, reproducibility, execution ownership, runtime contract validation, deterministic test setup, CI efficiency, and failure diagnostics**.
 
-> This framework is actively evolving as additional Quality Engineering capabilities are introduced.
+## Engineering Capabilities
 
-## Overview
+| Area | Implementation |
+| --- | --- |
+| API Testing | Browser-independent Playwright API tests with domain-specific clients |
+| Contract Testing | TypeBox schemas with AJV runtime validation |
+| UI Automation | Page Objects, Component Objects, fixtures, and network mocking |
+| Authentication | Programmatic API and browser authentication |
+| Test Data | Deterministic factories with scenario-specific overrides |
+| Cross-Browser | Chromium, Firefox, and WebKit execution |
+| Containerization | Reproducible Playwright execution with Docker |
+| CI/CD | GitHub Actions with quality gates and browser matrix execution |
+| Diagnostics | HTML reports, traces, screenshots, video, and CI artifacts |
+| Engineering Standards | Architecture documentation, testing standards, and ADRs |
 
-This repository demonstrates how a Playwright test suite can evolve beyond individual automated tests into a structured Quality Engineering framework.
+## Architecture at a Glance
 
-The framework currently provides:
+```text
+                    Playwright Test Suite
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+         API Testing               UI Testing
+              │                         │
+       Domain Clients            Page / Components
+              │                         │
+       TypeBox Schemas              Fixtures
+              │                         │
+     AJV Runtime Validation     Programmatic Auth
+              │                         │
+              └────────────┬────────────┘
+                           │
+                    Test Infrastructure
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+            Docker                GitHub Actions
+              │                         │
+      Reproducible Runtime       Quality Gates
+                                API Execution
+                                Browser Matrix
+                                Test Artifacts
+```
 
-- API and UI automation with Playwright;
-- schema-first API contract validation with TypeBox and AJV;
-- domain-specific API clients;
-- deterministic test-data factories;
-- reusable Playwright fixtures;
-- programmatic API and browser authentication;
-- Page Object and Component Object patterns;
-- network mocking for controlled UI scenarios;
-- cross-browser UI execution;
-- dedicated browser-independent API execution;
-- containerized Playwright execution with Docker;
-- runtime environment selection for reusable test images;
-- persistent test artifacts from ephemeral containers;
-- GitHub Actions CI with quality gates;
-- browser matrix execution;
-- Playwright reports and failure diagnostics;
-- explicit architecture and testing standards for human and AI-assisted development.
+## Engineering Approach
 
-The framework is intentionally extended only when new capabilities demonstrate a real architectural need.
+This repository is intentionally developed as an **automation engineering system rather than a collection of automated tests**.
+
+The framework favors:
+
+- explicit responsibility boundaries;
+- reusable but focused abstractions;
+- runtime validation instead of trusting compile-time types alone;
+- API-driven setup where browser interaction is not the behavior under test;
+- deterministic and isolated test data;
+- reproducible execution across local and CI environments;
+- build-once, configure-at-runtime container execution;
+- efficient CI ownership between API and browser tests;
+- actionable diagnostics when execution fails;
+- documented architectural decisions and trade-offs.
+
+New capabilities are introduced only when they demonstrate a real testing or architectural requirement.
+
+> **Project status:** Active development. The current foundation includes API/UI automation, contract validation, programmatic authentication, Dockerized execution, cross-browser testing, and GitHub Actions CI. Additional Quality Engineering capabilities are introduced incrementally as the framework evolves.
+
+## Quick Navigation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Testing Standards](docs/TESTING_STANDARDS.md)
+- [Framework Requirements](docs/FRAMEWORK_REQUIREMENTS.md)
+- [Architecture Decision Records](docs/adr/)
+- [Docker Execution](#docker-execution)
+- [CI Pipeline](#ci-pipeline)
+- [Running Locally](#running-locally)
+
+## Technology Stack
 
 ## Technology Stack
 
