@@ -315,20 +315,28 @@ Local Docker artifact persistence and CI artifact upload are separate concerns. 
 
 ## CI Pipeline
 
-GitHub Actions provides automated quality validation and test execution.
+GitHub Actions provides automated quality validation and containerized test execution.
 
 Current execution architecture:
 
 ```text
 quality
-    ↓
-    ├── api
-    │   └── API tests
-    │
-    └── ui matrix
-        ├── Chromium
-        ├── Firefox
-        └── WebKit
+├── Prettier
+└── TypeScript typecheck
+        ↓
+build-image
+├── docker build once
+├── image tag = github.sha
+├── docker save
+└── temporary GitHub Actions artifact
+        ↓
+        ├── api
+        │   └── same image → --project=api
+        │
+        └── ui matrix
+            ├── same image → chromium
+            ├── same image → firefox
+            └── same image → webkit
 ```
 
 The quality gate currently validates:
@@ -338,13 +346,19 @@ Prettier
 → TypeScript typecheck
 ```
 
+After quality validation succeeds, CI builds the reusable Playwright test image once.
+
+The image is tagged with the current commit SHA, saved as a temporary GitHub Actions artifact, and reused by the API and UI jobs.
+
 API tests execute once because they are browser-independent.
 
 UI and smoke tests execute through browser-specific Playwright projects using a GitHub Actions matrix.
 
-Each UI job installs only the browser required for that execution.
+The API and UI jobs load and execute the same previously built Docker image rather than installing project dependencies or Playwright browsers independently on their runners.
 
-The current GitHub Actions pipeline executes directly on GitHub-hosted runners. Docker execution is currently a separately validated framework capability and has not replaced the existing CI execution model.
+Test containers are ephemeral and execute with `--rm`.
+
+Playwright report and test-result directories are bind-mounted from the containers to the GitHub Actions runners so CI can upload them as workflow artifacts after container execution.
 
 ## Playwright Projects
 

@@ -694,23 +694,66 @@ Runtime credentials, when genuinely required, must be supplied through an approp
 
 ### Docker and CI Standard
 
-The existence of a Dockerfile does not imply that CI must execute tests through Docker.
+The current GitHub Actions pipeline uses Docker as the Playwright test execution environment.
 
-The current GitHub Actions pipeline executes directly on GitHub-hosted runners.
+CI must preserve the same execution principles used by local Docker execution:
 
-Docker is currently a separately validated execution capability.
+```text
+one reusable image
+→ runtime configuration
+→ Playwright project selection
+→ ephemeral container execution
+→ durable external artifacts
+```
 
-Before replacing native CI execution with containerized execution, evaluate:
+The test image must be built once per workflow execution and reused across API and browser jobs.
 
-- reproducibility benefit;
-- image build or pull cost;
+Do not independently rebuild an equivalent image in every test job unless a demonstrated isolation or performance requirement justifies it.
+
+The current CI image flow is:
+
+```text
+quality
+→ build image once
+→ tag with github.sha
+→ docker save
+→ temporary workflow artifact
+→ download in test job
+→ docker load
+→ docker run
+```
+
+API and UI jobs must use the same built image.
+
+Playwright remains responsible for selecting the execution project:
+
+```text
+API job
+→ --project=api
+
+UI matrix
+→ --project=chromium
+→ --project=firefox
+→ --project=webkit
+```
+
+Docker must not introduce separate images merely to mirror Playwright project boundaries.
+
+Containerized CI execution should remain ephemeral through `--rm`.
+
+Reports and diagnostics that must survive the container lifecycle must be mounted to the GitHub Actions runner and then preserved using the existing CI artifact strategy.
+
+When evolving the containerized CI model, evaluate:
+
+- reproducibility;
+- image build and transfer cost;
 - execution time;
-- browser runtime requirements;
-- artifact handling;
+- artifact size;
 - debugging experience;
+- runner storage;
 - maintenance overhead.
 
-Do not introduce Docker into CI merely for architectural symmetry.
+Docker should remain in CI because it currently provides an intentional shared execution boundary, not merely for architectural symmetry.
 
 ## CI Execution Standard
 
@@ -719,6 +762,8 @@ The current CI dependency model is:
 ```text
 quality
     ↓
+build-image
+    ↓
     ├── api
     └── ui matrix
         ├── chromium
@@ -726,11 +771,15 @@ quality
         └── webkit
 ```
 
-The `api` and `ui` jobs should depend on quality validation rather than on each other unless a genuine runtime dependency exists.
+The `build-image` job should depend on successful quality validation.
+
+The `api` and `ui` jobs should depend on the successfully built image rather than directly on the quality job.
+
+API and UI jobs must remain independent from one another unless a genuine runtime dependency is introduced.
 
 Do not serialize independent jobs merely because they belong to the same workflow.
 
-The quality job should fail fast on inexpensive validation before expensive browser execution begins.
+The quality job should fail fast on inexpensive validation before expensive image building and browser execution begins.
 
 Current quality gates include:
 
@@ -743,13 +792,17 @@ Prettier
 
 CI optimization must not weaken reproducibility or diagnostic quality.
 
-Use the npm package cache to reduce repeated dependency download cost while preserving:
+The quality job may use the npm package cache to reduce repeated dependency download cost while preserving:
 
 ```text
 npm ci
 ```
 
-as the required CI dependency installation command.
+as its reproducible dependency installation command.
+
+The Docker image must also install project dependencies reproducibly through `npm ci`.
+
+Containerized test jobs should reuse the dependency state already contained in the built image rather than reinstalling dependencies independently.
 
 Do not replace reproducible installation with a cached `node_modules` directory merely to reduce execution time.
 
@@ -770,6 +823,9 @@ Current limits:
 ```text
 quality
 → 5 minutes
+
+build-image
+→ 15 minutes
 
 api
 → 10 minutes
@@ -806,24 +862,27 @@ Flaky tests should be investigated and corrected. If temporary quarantine become
 
 ## CI Browser Installation Standard
 
-Install only the runtime required by the job.
+Containerized Playwright test jobs must use the browser runtime already provided by the reusable Playwright Docker image.
 
 API job:
 
 ```text
-npm dependencies
-→ no browser binary required
+load reusable test image
+→ no browser execution required
+→ execute --project=api
 ```
 
 UI matrix job:
 
 ```text
-npm dependencies
-→ install matrix browser
-→ execute matching Playwright project
+load same reusable test image
+→ select matrix browser through Playwright project
+→ execute matching project
 ```
 
-Do not install all browsers in every job when only one browser is required.
+Do not reinstall Playwright browsers independently in API or UI test jobs when the required browser binaries and operating-system dependencies are already provided by the shared image.
+
+Do not create browser-specific Docker images merely to match the browser matrix.
 
 ## CI Environment Standard
 

@@ -92,7 +92,7 @@ Factory
 Domain API Client
   ↓
 TypeBox Schema
-  ├── Static<T> → compile-time type
+  ├── Static<T> → compile-time TypeScript type
   └── AJV → runtime validation
   ↓
 HTTP assertion
@@ -316,7 +316,7 @@ Secrets must not be copied into an image. Removing a secret in a later Dockerfil
 
 ## CI Execution Architecture
 
-CI execution is organized by responsibility.
+CI execution is organized by responsibility while using the Docker image as the reusable Playwright execution environment.
 
 The current GitHub Actions dependency model is:
 
@@ -324,37 +324,68 @@ The current GitHub Actions dependency model is:
 quality
 ├── formatting
 └── typecheck
-    ↓
-    ├── api
-    │   └── API tests once
-    │
-    └── ui matrix
-        ├── chromium
-        ├── firefox
-        └── webkit
+        ↓
+build-image
+├── docker build once
+├── image tag = github.sha
+├── docker save
+└── temporary workflow artifact
+        ↓
+        ├── api
+        │   └── API tests once
+        │
+        └── ui matrix
+            ├── chromium
+            ├── firefox
+            └── webkit
 ```
 
-The `api` and `ui` jobs depend on the successful completion of the `quality` job but do not depend on one another.
+The `build-image` job depends on the successful completion of the `quality` job.
 
-This allows API and UI execution to proceed independently and in parallel after static quality validation succeeds.
+The `api` and `ui` jobs depend on `build-image` but do not depend on one another.
 
-The API job does not install browser binaries because browser execution is not required.
+This allows API and UI execution to proceed independently and in parallel after the reusable test image has been built.
 
-Each UI matrix job installs only the browser required by that matrix entry.
+The Docker image is built once per workflow execution and tagged with the current commit SHA.
 
-CI should avoid unnecessary work when execution responsibility can be expressed explicitly.
+The built image is transferred between GitHub-hosted runners through a temporary GitHub Actions artifact:
 
-The current GitHub Actions pipeline executes directly on GitHub-hosted runners.
+```text
+docker build
+→ docker save
+→ workflow artifact
+→ download
+→ docker load
+→ docker run
+```
 
-Docker is currently a separately validated execution capability and has not replaced the existing CI execution model.
+Both API and browser execution use the same image.
 
-Introducing Docker into CI should require an explicit evaluation of its reproducibility benefit against image build or pull cost, execution complexity, diagnostics, and maintenance overhead.
+Playwright project selection remains responsible for execution scope:
+
+```text
+api
+→ --project=api
+
+ui matrix
+→ --project=chromium
+→ --project=firefox
+→ --project=webkit
+```
+
+CI does not create separate images for individual Playwright projects.
+
+Test containers are ephemeral and return the Playwright process exit code to GitHub Actions.
+
+Generated Playwright output is bind-mounted to the runner before GitHub Actions uploads the required reports and diagnostics as workflow artifacts.
+
+This preserves a single reusable execution environment while retaining explicit API and browser execution ownership.
 
 ### CI Execution Hardening
 
 CI execution includes explicit controls for efficiency, isolation, and diagnostic completeness.
 
-Dependency installation uses the npm package cache while preserving `npm ci` as the reproducible installation boundary.
+The quality job uses the npm package cache while preserving `npm ci` as its reproducible installation boundary.
 
 ```text
 npm cache
@@ -363,6 +394,8 @@ npm cache
 npm ci
 → clean lockfile-based dependency installation
 ```
+
+The containerized test jobs do not reinstall project dependencies. Their dependency state comes from the previously built Docker image, where dependencies were installed through `npm ci`.
 
 Caching must improve execution efficiency without bypassing deterministic dependency installation.
 
@@ -383,6 +416,9 @@ Current limits are:
 ```text
 quality
 → 5 minutes
+
+build-image
+→ 15 minutes
 
 api
 → 10 minutes
