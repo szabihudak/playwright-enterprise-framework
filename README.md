@@ -6,18 +6,18 @@ The framework is designed around the concerns that matter in real automation sys
 
 ## Engineering Capabilities
 
-| Area | Implementation |
-| --- | --- |
-| API Testing | Browser-independent Playwright API tests with domain-specific clients |
-| Contract Testing | TypeBox schemas with AJV runtime validation |
-| UI Automation | Page Objects, Component Objects, fixtures, and network mocking |
-| Authentication | Programmatic API and browser authentication |
-| Test Data | Deterministic factories with scenario-specific overrides |
-| Cross-Browser | Chromium, Firefox, and WebKit execution |
-| Containerization | Reproducible Playwright execution with Docker |
-| CI/CD | GitHub Actions with quality gates and browser matrix execution |
-| Diagnostics | HTML reports, traces, screenshots, video, and CI artifacts |
-| Engineering Standards | Architecture documentation, testing standards, and ADRs |
+| Area                  | Implementation                                                        |
+| --------------------- | --------------------------------------------------------------------- |
+| API Testing           | Browser-independent Playwright API tests with domain-specific clients |
+| Contract Testing      | TypeBox schemas with AJV runtime validation                           |
+| UI Automation         | Page Objects, Component Objects, fixtures, and network mocking        |
+| Authentication        | Programmatic API and browser authentication                           |
+| Test Data             | Deterministic factories with scenario-specific overrides              |
+| Cross-Browser         | Chromium, Firefox, and WebKit execution                               |
+| Containerization      | Reproducible Playwright execution with Docker                         |
+| CI/CD                 | GitHub Actions with quality gates and browser matrix execution        |
+| Diagnostics           | HTML reports, traces, screenshots, video, and CI artifacts            |
+| Engineering Standards | Architecture documentation, testing standards, and ADRs               |
 
 ## Architecture at a Glance
 
