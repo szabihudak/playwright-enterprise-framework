@@ -24,12 +24,18 @@ The framework follows these principles:
 - test execution scope should reflect the responsibility being tested;
 - browser-independent API tests should not be multiplied across browser projects;
 - browser-dependent UI tests should execute against the intended browser projects;
+- execution environments should remain reproducible and independently configurable from test targets;
+- runtime configuration should not be baked into reusable test images;
+- test artifacts that must outlive ephemeral execution should be persisted outside that execution lifecycle;
 - abstractions are introduced only when there is demonstrated reuse or architectural value;
 - existing patterns should be extended before parallel patterns are created.
 
 ## Repository Structure
 
 ```text
+Dockerfile
+.dockerignore
+
 config/
   environments/
 
@@ -148,6 +154,166 @@ UI and smoke tests validate browser-visible behavior and may run across multiple
 
 This separation avoids redundant API execution while preserving cross-browser UI coverage.
 
+## Docker Execution Architecture
+
+Docker provides an additional reproducible execution boundary for the Playwright framework.
+
+The current test image uses the official Playwright runtime matching the project's installed Playwright version:
+
+```text
+mcr.microsoft.com/playwright:v1.62.1-noble
+```
+
+The image contains the browser binaries and operating-system dependencies required for Playwright execution.
+
+Project dependencies are installed inside the image through:
+
+```text
+npm ci
+```
+
+using the committed package manifest and lockfile.
+
+The image is intentionally reusable across Playwright projects.
+
+```text
+one test image
+    ↓
+runtime command
+    ├── complete suite
+    ├── api
+    ├── chromium
+    ├── firefox
+    └── webkit
+```
+
+Separate Docker images should not be introduced merely because the framework contains separate Playwright projects.
+
+The execution project remains a Playwright responsibility. Docker provides the execution environment.
+
+### Docker Image and Container Boundary
+
+A Docker image represents the reusable execution environment.
+
+A container represents a runtime instance of that image.
+
+```text
+Dockerfile
+    ↓
+docker build
+    ↓
+image
+    ↓
+docker run
+    ↓
+container
+    ↓
+Playwright process
+    ↓
+exit code
+```
+
+The lifetime of a test container follows the lifetime of its main process.
+
+When Playwright completes, the container stops.
+
+For ephemeral test execution, stopped containers may be removed automatically through:
+
+```text
+--rm
+```
+
+The container exit code communicates the result of the test process to the calling execution environment.
+
+### Docker Environment Model
+
+The Docker image must remain independent from the selected test target.
+
+The framework follows:
+
+```text
+build once
+→ configure at runtime
+```
+
+`TEST_ENV` is therefore supplied when the container executes rather than baked into the image.
+
+For example:
+
+```text
+Docker container
+→ execution environment
+
+TEST_ENV=hosted
+→ test target environment
+```
+
+This preserves the same distinction already used by CI:
+
+```text
+execution context
+≠
+test target environment
+```
+
+A reusable image should not need to be rebuilt merely to select another supported test target.
+
+### Docker Artifact Boundary
+
+A container filesystem is ephemeral and must not be treated as durable artifact storage.
+
+Outputs that must survive container removal need an explicit persistence boundary.
+
+For local Docker execution, the current approach uses bind mounts:
+
+```text
+container
+/app/playwright-report
+/app/test-results
+        ↓
+bind mount
+        ↓
+host
+playwright-report/
+test-results/
+```
+
+This allows the container to be removed after execution while preserving the generated test evidence.
+
+Docker artifact persistence and CI artifact storage are related concerns but use different mechanisms.
+
+```text
+local Docker
+→ bind mount to host
+
+GitHub Actions
+→ workflow artifact upload
+```
+
+The architecture requires durable diagnostic outputs where needed; it does not require every execution environment to use the same persistence mechanism.
+
+### Docker Build Boundary
+
+The Docker build context is the repository root.
+
+The Dockerfile copies dependency metadata before the remaining source:
+
+```text
+package.json + package-lock.json
+    ↓
+npm ci
+    ↓
+remaining repository source
+```
+
+This ordering creates a dependency installation layer that can remain reusable when project source changes without dependency metadata changing.
+
+`.dockerignore` prevents local or sensitive files that do not belong in the image from entering the build context.
+
+Current exclusions include local dependency directories, generated reports, Git metadata, and environment files.
+
+Secrets must not be copied into an image. Removing a secret in a later Dockerfile instruction does not make its presence in an earlier image layer acceptable.
+
 ## CI Execution Architecture
 
 CI execution is organized by responsibility.
@@ -177,6 +343,12 @@ The API job does not install browser binaries because browser execution is not r
 Each UI matrix job installs only the browser required by that matrix entry.
 
 CI should avoid unnecessary work when execution responsibility can be expressed explicitly.
+
+The current GitHub Actions pipeline executes directly on GitHub-hosted runners.
+
+Docker is currently a separately validated execution capability and has not replaced the existing CI execution model.
+
+Introducing Docker into CI should require an explicit evaluation of its reproducibility benefit against image build or pull cost, execution complexity, diagnostics, and maintenance overhead.
 
 ### CI Execution Hardening
 
@@ -555,6 +727,10 @@ Do not place browser-dependent behavior under the API suite.
 Do not place browser-independent API contract tests under UI or smoke suites merely to force execution through browser projects.
 
 If a new test type requires a materially different execution model, introduce the smallest explicit project boundary required by the behavior rather than extending unrelated projects.
+
+Docker does not change Playwright project ownership.
+
+Running a test inside a container changes its execution environment, not its test responsibility.
 
 ## Abstraction Rules
 

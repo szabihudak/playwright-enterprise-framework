@@ -2,7 +2,7 @@
 
 A production-oriented test automation framework built with **Playwright** and **TypeScript**, designed to demonstrate scalable Quality Engineering practices across API and browser testing.
 
-The project focuses on maintainable architecture, runtime API contract validation, reusable test infrastructure, deterministic test data, programmatic authentication, and CI execution designed around test responsibility.
+The project focuses on maintainable architecture, runtime API contract validation, reusable test infrastructure, deterministic test data, programmatic authentication, reproducible containerized execution, and CI execution designed around test responsibility.
 
 > This framework is actively evolving as additional Quality Engineering capabilities are introduced.
 
@@ -22,6 +22,9 @@ The framework currently provides:
 - network mocking for controlled UI scenarios;
 - cross-browser UI execution;
 - dedicated browser-independent API execution;
+- containerized Playwright execution with Docker;
+- runtime environment selection for reusable test images;
+- persistent test artifacts from ephemeral containers;
 - GitHub Actions CI with quality gates;
 - browser matrix execution;
 - Playwright reports and failure diagnostics;
@@ -38,6 +41,7 @@ The framework is intentionally extended only when new capabilities demonstrate a
 | API Testing               | Playwright APIRequestContext  |
 | Runtime Schema Validation | TypeBox + AJV                 |
 | UI Automation             | Playwright Browser Automation |
+| Containerization          | Docker                        |
 | CI/CD                     | GitHub Actions                |
 | Formatting                | Prettier                      |
 | Target Application        | UPEX DOJO                     |
@@ -91,6 +95,9 @@ For the complete architectural rules, see [`docs/ARCHITECTURE.md`](docs/ARCHITEC
 ## Repository Structure
 
 ```text
+Dockerfile
+.dockerignore
+
 config/
   environments/
 
@@ -215,6 +222,97 @@ Negative tests can intentionally generate partial or invalid payloads when requi
 
 Factories remain independent from HTTP execution, UI interaction, assertions, and fixture lifecycle.
 
+## Docker Execution
+
+Docker provides a reproducible execution environment for the Playwright test suite.
+
+The test image is built from the official Playwright image matching the framework's installed Playwright version:
+
+```text
+mcr.microsoft.com/playwright:v1.62.1-noble
+```
+
+The image contains the Linux runtime and browser dependencies required for Playwright execution, while project dependencies are installed reproducibly through:
+
+```text
+npm ci
+```
+
+The framework follows:
+
+```text
+build once
+→ configure at runtime
+```
+
+Target environment selection is therefore not baked into the image.
+
+For example:
+
+```bash
+docker run --rm \
+  -e TEST_ENV=hosted \
+  playwright-enterprise-tests
+```
+
+The same image can execute a specific Playwright project by overriding the default container command:
+
+```bash
+docker run --rm \
+  -e TEST_ENV=hosted \
+  playwright-enterprise-tests \
+  npx playwright test --project=api
+```
+
+This keeps the container image reusable rather than creating separate images for API and browser projects.
+
+### Container Lifecycle
+
+Test containers are treated as ephemeral execution environments.
+
+```text
+Docker image
+    ↓
+container starts
+    ↓
+Playwright executes
+    ↓
+process returns exit code
+    ↓
+container stops
+    ↓
+container removed
+```
+
+`--rm` removes the stopped container automatically after execution.
+
+The container exit code represents the test-process result and can therefore be consumed by the calling execution environment.
+
+### Docker Artifacts
+
+Container filesystems are ephemeral, so test outputs that must survive container removal are persisted outside the container lifecycle.
+
+For local Docker execution, Playwright reports and test results can be bind-mounted to the host:
+
+```bash
+docker run --rm \
+  -e TEST_ENV=hosted \
+  -v "$(pwd)/playwright-report:/app/playwright-report" \
+  -v "$(pwd)/test-results:/app/test-results" \
+  playwright-enterprise-tests
+```
+
+This preserves:
+
+```text
+playwright-report/
+test-results/
+```
+
+on the host even after the container is removed.
+
+Local Docker artifact persistence and CI artifact upload are separate concerns. GitHub Actions continues to preserve CI execution evidence through its artifact upload strategy.
+
 ## CI Pipeline
 
 GitHub Actions provides automated quality validation and test execution.
@@ -245,6 +343,8 @@ API tests execute once because they are browser-independent.
 UI and smoke tests execute through browser-specific Playwright projects using a GitHub Actions matrix.
 
 Each UI job installs only the browser required for that execution.
+
+The current GitHub Actions pipeline executes directly on GitHub-hosted runners. Docker execution is currently a separately validated framework capability and has not replaced the existing CI execution model.
 
 ## Playwright Projects
 
@@ -279,6 +379,8 @@ Artifacts are separated by execution responsibility and browser so failures rema
 
 Playwright is configured to retain additional diagnostics for failed or retried execution, including screenshots, video, and traces according to the configured policy.
 
+Docker-based local execution can preserve the same generated Playwright output directories through bind mounts, independently of CI artifact handling.
+
 ## Environment Configuration
 
 The framework supports explicit target environments through `TEST_ENV`.
@@ -297,7 +399,25 @@ The GitHub Actions workflow explicitly targets:
 TEST_ENV=hosted
 ```
 
-CI execution context and test target environment are intentionally treated as separate concepts.
+Docker execution can select the same target at container runtime:
+
+```text
+docker run -e TEST_ENV=hosted ...
+```
+
+The execution environment and test target environment are intentionally treated as separate concepts.
+
+For example:
+
+```text
+execution environment
+→ local machine
+→ Docker container
+→ GitHub Actions runner
+
+test target environment
+→ selected through TEST_ENV
+```
 
 ## Running Locally
 
@@ -341,6 +461,41 @@ Run TypeScript validation:
 
 ```bash
 npm run typecheck
+```
+
+### Running with Docker
+
+Build the reusable Playwright test image:
+
+```bash
+docker build -t playwright-enterprise-tests .
+```
+
+Run the complete configured suite against the hosted target:
+
+```bash
+docker run --rm \
+  -e TEST_ENV=hosted \
+  playwright-enterprise-tests
+```
+
+Run only the API project:
+
+```bash
+docker run --rm \
+  -e TEST_ENV=hosted \
+  playwright-enterprise-tests \
+  npx playwright test --project=api
+```
+
+Run the complete suite while preserving reports and test results on the host:
+
+```bash
+docker run --rm \
+  -e TEST_ENV=hosted \
+  -v "$(pwd)/playwright-report:/app/playwright-report" \
+  -v "$(pwd)/test-results:/app/test-results" \
+  playwright-enterprise-tests
 ```
 
 ## Engineering Standards
@@ -415,6 +570,9 @@ Network mocking               ✅
 Page/Component architecture   ✅
 Programmatic browser auth     ✅
 Cross-browser execution       ✅
+Docker test execution         ✅
+Runtime container config      ✅
+Container artifact persistence ✅
 GitHub Actions CI             ✅
 CI quality gates              ✅
 CI artifacts                  ✅
@@ -435,9 +593,10 @@ The framework favors:
 - runtime validation;
 - reusable but focused abstractions;
 - deterministic setup;
+- reproducible execution;
 - maintainable test structure;
 - efficient CI execution;
 - meaningful diagnostics;
 - documented architectural decisions.
 
-A passing test is necessary, but maintainability, reliability, and architectural consistency are part of the definition of quality.
+A passing test is necessary, but maintainability, reliability, reproducibility, and architectural consistency are part of the definition of quality.

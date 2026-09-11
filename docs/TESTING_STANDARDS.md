@@ -518,6 +518,200 @@ Do not create a generic mock abstraction before repeated mocking behavior demons
 
 A mocked UI test remains browser-dependent if it verifies UI behavior.
 
+## Docker Execution Standard
+
+Docker execution must preserve the same Playwright project ownership and framework behavior as native execution.
+
+Docker changes the execution environment, not the responsibility of the test.
+
+```text
+native execution
+or
+Docker execution
+        ↓
+same Playwright projects
+        ↓
+same test ownership
+        ↓
+same framework behavior
+```
+
+### Image Standard
+
+Use the official Playwright image matching the Playwright version installed by the project lockfile.
+
+The current image is:
+
+```text
+mcr.microsoft.com/playwright:v1.62.1-noble
+```
+
+Do not use an arbitrary `latest` Playwright image.
+
+Browser binaries and operating-system dependencies are provided by the official Playwright image, so the Dockerfile should not reinstall Playwright browsers without a demonstrated need.
+
+Install project dependencies reproducibly with:
+
+```text
+npm ci
+```
+
+Copy package metadata before the remaining source so dependency installation can use Docker layer caching when dependency metadata has not changed.
+
+### Runtime Configuration Standard
+
+Environment-specific test configuration must be supplied at container runtime rather than baked into the image.
+
+Prefer:
+
+```bash
+docker run --rm \
+  -e TEST_ENV=hosted \
+  playwright-enterprise-tests
+```
+
+Do not encode the selected `TEST_ENV` into the Docker image.
+
+The framework follows:
+
+```text
+build once
+→ configure at runtime
+```
+
+Container execution environment and test target environment are separate concerns.
+
+### Project Execution Standard
+
+Use one reusable test image across the existing Playwright projects.
+
+To execute a specific project, override the default container command:
+
+```bash
+docker run --rm \
+  -e TEST_ENV=hosted \
+  playwright-enterprise-tests \
+  npx playwright test --project=api
+```
+
+Do not create separate Docker images for API, Chromium, Firefox, or WebKit merely because they are separate Playwright projects.
+
+Project selection remains a Playwright execution concern.
+
+### Container Lifecycle Standard
+
+Automated test containers should normally be ephemeral.
+
+Use:
+
+```text
+--rm
+```
+
+when the stopped container itself is not required for post-execution debugging.
+
+The Playwright process is the main container process. Its exit code represents the execution result:
+
+```text
+0
+→ successful execution
+
+non-zero
+→ failed execution
+```
+
+Do not treat a successfully started container as evidence that the test execution succeeded.
+
+### Artifact Persistence Standard
+
+Do not rely on an ephemeral container filesystem for artifacts that must survive execution.
+
+For local Docker execution, persist Playwright outputs through bind mounts when the generated reports or diagnostics are required after container removal.
+
+Example:
+
+```bash
+docker run --rm \
+  -e TEST_ENV=hosted \
+  -v "$(pwd)/playwright-report:/app/playwright-report" \
+  -v "$(pwd)/test-results:/app/test-results" \
+  playwright-enterprise-tests
+```
+
+This preserves:
+
+```text
+playwright-report/
+test-results/
+```
+
+outside the container lifecycle.
+
+Do not assume that local Docker bind mounts and CI artifact upload are the same mechanism.
+
+```text
+local Docker
+→ bind mount
+
+GitHub Actions
+→ artifact upload
+```
+
+Use the persistence mechanism appropriate to the execution environment.
+
+### Build Context and Secret Standard
+
+The Docker build context must exclude local files that do not belong in the reusable image.
+
+`.dockerignore` should exclude generated outputs, local dependencies, Git metadata, and environment files where applicable.
+
+Current examples include:
+
+```text
+node_modules
+playwright-report
+test-results
+.git
+.env
+.env.*
+```
+
+Secrets must not be copied into the Docker image.
+
+Do not:
+
+```text
+COPY secret
+→ use secret
+→ delete secret
+```
+
+and assume the secret has been removed safely.
+
+Data introduced into an earlier image layer may remain recoverable from the image history.
+
+Runtime credentials, when genuinely required, must be supplied through an appropriate runtime secret mechanism rather than embedded into the image.
+
+### Docker and CI Standard
+
+The existence of a Dockerfile does not imply that CI must execute tests through Docker.
+
+The current GitHub Actions pipeline executes directly on GitHub-hosted runners.
+
+Docker is currently a separately validated execution capability.
+
+Before replacing native CI execution with containerized execution, evaluate:
+
+- reproducibility benefit;
+- image build or pull cost;
+- execution time;
+- browser runtime requirements;
+- artifact handling;
+- debugging experience;
+- maintenance overhead.
+
+Do not introduce Docker into CI merely for architectural symmetry.
+
 ## CI Execution Standard
 
 The current CI dependency model is:
