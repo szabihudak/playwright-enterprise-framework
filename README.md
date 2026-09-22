@@ -9,6 +9,12 @@ A production-oriented **Playwright + TypeScript test automation framework** demo
 
 The framework is designed around the concerns that matter in real automation systems: **maintainability, reproducibility, execution ownership, runtime contract validation, deterministic test setup, CI efficiency, and failure diagnostics**.
 
+> **Portfolio context:** This repository is a standalone, runnable public framework focused on the core API, UI, contract-validation, cross-browser, Docker, and CI engineering patterns of the broader Quality Engineering portfolio.
+>
+> The complete current framework evolves separately as the canonical implementation, while the public showcase presents additional capabilities, architecture, and execution evidence such as accessibility, visual regression, and performance engineering.
+>
+> **[Explore the full Quality Engineering Portfolio →](https://szabihudak.github.io/quality-engineering-showcase/)**
+
 ## Engineering Capabilities
 
 | Area                  | Implementation                                                        |
